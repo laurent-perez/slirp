@@ -1,0 +1,60 @@
+See ../vec/performance/README for information on the machines used
+to gather the performance data collected here.  Always make sure that
+everything you are comparing has been compiled with the same
+optimization flags!!!!
+
+Examples:
+
+   % isis-script ../perform.sl -p sin
+
+   The -p is used to load the parallel module (par-module.so),
+   instead of the default serial-vectorized module (vec-module.so).
+
+   % slsh-omp ../perform.sl -l operators.sl
+
+   Here, intsead of loading a specific module, we load a script
+   which is itself responsible for defining the funcs to be 
+   called (optionally loading a module, etc).
+
+
+# SLIRP vectorization benchmark data
+# Generated: Fri May 25 16:13:48 2007
+# Command:   ../perform.sl -p sin
+# Number of Iterations (func invocations) per array size: 20
+# System:    svoboda (i686 Linux)
+ 
+# Elements      sin             psin
+ 
+       250      1.683e-05       3.144e-05
+       500      3.217e-05       5.083e-05
+      1000      6.178e-05       6.633e-05
+      3000      1.844e-04       1.319e-04
+      5000      3.079e-04       1.996e-04
+     10000      6.254e-04       3.693e-04
+     20000      1.706e-03       9.995e-04
+     50000      4.034e-03       2.430e-03
+     ...
+
+
+Note that the opdata-* directories shown below exist only on
+my development and testing machines.
+
+Function plots were generated with ./plot, and operator plots with
+plot-oper.  The second uses a smarter algorithm to find inflection
+points, but the flaw that was corrected is not apparent in the
+function plots, anyway.
+
+For example,
+
+	cd opdata-solaris4
+ 	for i in 0 500 1000 5000 10000 50000 100000 ; do
+	   ../plot-oper -ps -which=[5:7] solaris1.dat solaris4-$i.dat &
+	done
+
+plots the x_le_dmax, x_gt_1, and x_cubed columns, while
+
+ 	for i in 0 500 1000 5000 10000 50000 100000 ; do
+	   ../plot-oper -ps solaris1.dat solaris4-$i.dat &
+	done
+
+plots the default columns (x_plus_x,  x_minus_x,  x_times_x,  x_div_x).

@@ -1,0 +1,58 @@
+Scalar cannot be used here
+
+Array shape or length mismatch
+
+Array shape or length mismatch
+
+Scalar cannot be used here
+
+Usage:  double[] = vmult(double[],double[])
+	This function has been vectorized.
+
+array with 4 elements required
+Usage:  add2d(double[2][2],double[2][2])
+	This function has been vectorized.
+
+double_value[0] = 1
+double_value[1] = 2
+double_value[2] = 3
+double_value[0] = 2
+double_value[1] = 4
+double_value[2] = 6
+Usage:  Computation_set_verbose(Computation,uchar)
+	This function has been vectorized.
+
+Usage:  stupid(int,int,int,int,int,float,int,double,string,int,float,int)
+
+Usage:  add2dp(double_ptr_ptr,double_ptr_ptr)
+	This function has been vectorized.
+
+double_ptr_ptr_Type
+d[0][0] = 8.000000
+d[0][1] = 8.000000
+d[1][0] = 8.000000
+d[1][1] = 8.000000
+d[0][0] = 5.000000
+d[0][1] = 5.000000
+d[1][0] = 5.000000
+d[1][1] = 5.000000
+d[0][0] = 15.000000
+d[0][1] = 15.000000
+d[1][0] = 15.000000
+d[1][1] = 15.000000
+d[0][0] = 25.000000
+d[0][1] = 25.000000
+d[1][0] = 25.000000
+d[1][1] = 25.000000
+Usage:  add2dp(double_ptr_ptr,double_ptr_ptr)
+	This function has been vectorized.
+
+Usage:  double_ptr_ptr = make2dp(double)
+	This function has been vectorized.
+
+Pi destructor
+Computation destructor
+Pi destructor
+Computation destructor
+Pi destructor
+Computation destructor

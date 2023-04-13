@@ -1,0 +1,146 @@
+
+ksink_sum (-1, 1) = 0
+ksink_sum (55, 45) = 100
+
+&ksink_mult (333, 3) = 999
+&ksink_mult2 (333, 3) = 999
+&ksink_mult (1.57079632679490, 2) = 3.14159265358979
+&ksink_mult2 (1.57079632679490, 2) = 3.14159265358979
+
+After ksink_set_ref_i(&i) the new value of i is: -9191
+
+ksink_datum_new() returned: <KDatum_Type>
+ksink_make_array_i() returned: <int_ptr>
+ksink_print_array_i: element 1 = <10>
+ksink_print_array_i: element 2 = <259>
+ksink_print_array_i: element 3 = <341>
+
+ksink_make_array_s() returned: <string_ptr>
+Array input to ksink_print_array_s is of dimension: 1
+ksink_print_array_s: element 1 = <Winnie>
+
+Array input to ksink_print_array_s is of dimension: 1
+ksink_print_array_s: element 1 = <one>
+ksink_print_array_s: element 2 = <two>
+ksink_print_array_s: element 3 = <three>
+
+Array input to ksink_print_array_s is of dimension: 2
+ksink_print_array_s: element 1 = <sarray_2d_elem11>
+ksink_print_array_s: element 2 = <sarray_2d_elem12>
+
+ksink_make_array_datum() returned: <opaque_ptr>
+ksink_print_array_datum: elem 0 (name,value) = (one,1.000000)
+ksink_print_array_datum: elem 1 (name,value) = (zero,0.000000)
+ksink_print_array_datum: elem 2 (name,value) = (niner,9.000000)
+
+Array input to ksink_print_array_f is of dimension: 1
+ksink_print_array_f: element 1 = <1.100000>
+ksink_print_array_f: element 2 = <2.200000>
+ksink_print_array_f: element 3 = <3.300000>
+ksink_print_array_f: element 4 = <4.400000>
+ksink_print_array_f: element 5 = <5.500000>
+
+
+ksink_print_array_i: element 1 = <999>
+
+Array input to ksink_print_array_f is of dimension: 1
+ksink_print_array_f: element 1 = <11.100000>
+
+
+ksink_print_error: Success!
+ksink_print_error: Error: message = <bad>
+ksink_print_error: Error: message = <ugly>
+
+ksink_voidstar_echo mapped <int_ptr> type to <void_ptr> type
+ksink_voidstar_echo mapped <string_ptr> type to <void_ptr> type
+ksink_voidstar_echo mapped <opaque_ptr> type to <void_ptr> type
+
+Null terminated string array size: 8 elements
+ksink_print_array_nts: element 1 = <This>
+ksink_print_array_nts: element 2 = <Is>
+ksink_print_array_nts: element 3 = <A>
+ksink_print_array_nts: element 4 = <Null>
+ksink_print_array_nts: element 5 = <Terminated>
+ksink_print_array_nts: element 6 = <Array>
+ksink_print_array_nts: element 7 = <Of>
+ksink_print_array_nts: element 8 = <Strings>
+
+ksink_int_accepter:
+	i=101
+	j=202
+	k=303
+Finalizing arg 1 of ksink_int_accepter (with local copy)
+Finalizing arg 2 of ksink_int_accepter (with local copy)
+Finalizing arg 3 of ksink_int_accepter (with local copy)
+
+Before ksink_swap_double(&i, &j): i=<-9191.000000> and j=<-100.000000>
+After ksink_swap_double(&i, &j): i=<0.000000> and j=<0.000000>
+Before ksink_swap_double(i, &j): i=<999.000000> and j=<0.000000>
+After ksink_swap_double(i, &j): i=<999.000000> and j=<999.000000>
+Before ksink_swap_double(i, j): i=<333.333000> and j=<111.110000>
+After ksink_swap_double(i, j): i=<333.333000> and j=<111.110000>
+ksink_equals_array_d(array1, array2) returned: 0
+ksink_equals_array_d(array1, array1) returned: 1
+ksink_copy_string returned: WhoAreYou?
+ksink_arg_dropper_2:
+	l=332211	d=999.111
+ksink_arg_dropper_1:
+	l=112233
+ksink_arg_dropper_1:
+	l=333222111
+*** Test: examples done, now executing more stringent cases ***
+
+
+ksink_print_array_i: element 1 = <10>
+ksink_print_array_i: element 2 = <259>
+ksink_print_array_i: element 3 = <341>
+
+Usage:  ksink_print_array_s(string[])
+
+ksink_print_array_datum: elem 0 (name,value) = (test,3.200000)
+Array input to ksink_print_array_f is of dimension: 1
+ksink_print_array_f: element 1 = <99.000000>
+
+
+Unable to typecast int_ptr to float_ptr
+Usage:  ksink_print_array_f(float_array)
+
+Usage:  ksink_print_array_f(float_array)
+
+context requires array, ref, or opaque pointer
+Usage:  ksink_print_array_f(float_array)
+
+Unable to typecast Double_Type to Integer_Type
+context requires array, ref, or opaque pointer
+Usage:  ksink_print_array_i(long,int[])
+
+Usage:  ksink_print_array_datum(long,KDatum[])
+
+Unable to typecast int_ptr to opaque_ptr
+
+Unable to typecast int_ptr to uchar_ptr
+
+Unable to typecast int_ptr to string_ptr
+
+Unable to typecast string_ptr to float_ptr
+
+Unable to typecast string_ptr to double_ptr
+
+Unable to typecast opaque_ptr to long_ptr
+
+Unable to typecast opaque_ptr to ushort_ptr
+
+Unable to typecast Double_Type to void_ptr
+Usage:  void_ptr = ksink_voidstar_echo(void_ptr)
+
+Unable to typecast int_ptr to string_ptr
+Usage:  ksink_print_array_s(string[])
+
+Unable to typecast KDatum_Type to opaque_ptr
+Usage:  ksink_print_array_datum(long,KDatum[])
+
+Premature exit, after attempted NULL pointer ref
+ksink_equals_array_d: array size mismatch
+
+Usage:  ksink_arg_dropper_2()
+

@@ -1,0 +1,12 @@
+# SLIRP vectorization benchmark data
+# Generated: Fri Apr 28 16:15:58 2006
+# Command:   ./gather 1
+# System:    starburst (sun4u SunOS)
+
+# Elements	sqrt	vsqrt
+
+100		1.539e-05	1.689e-05
+1000		8.161e-05	8.800e-05
+10000		7.694e-04	8.393e-04
+100000		8.035e-03	8.558e-03
+1000000		1.015e-01	1.115e-01

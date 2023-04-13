@@ -1,0 +1,75 @@
+#! /bin/sh
+
+# Utility script to determine the size of FORTRAN data types
+# mnoble@space.mit.edu
+
+emsg()
+{
+   echo $1 1>&2
+}
+
+emsg_exit()
+{
+   emsg "$1"
+   echo 0
+   exit 0
+}
+
+Type="$*"
+if [ -z "$Type" ] ; then 
+   emsg "Usage:   `basename $0` fortran_data_type_name"
+   emsg_exit "Set FC env var to override default FORTRAN compiler setting."
+fi
+
+Exe=conftest
+Src=${Exe}.f
+Dat=${Exe}.dat
+if [ -z "$FC" ] ; then
+   FC=g77
+fi
+
+FC_Found=
+for dir in `echo $PATH | tr ':' ' '` ; do
+   if [ -x $dir/$FC ] ; then
+	FC_Found=$dir
+	break
+   fi
+done
+
+if [ -z "$FC_Found" ] ; then
+   emsg_exit "FORTRAN compiler <$FC> not found"
+fi
+
+sizeof()
+{
+   cat > $Src <<EOT
+      program fsizeof
+      $* a
+      open(unit=2,file='$Dat',form='unformatted')
+      rewind(unit=2)
+      write(2) a
+      close(unit=2)
+      end
+EOT
+   $FC -o $Exe $Src
+   \rm -f $Dat
+   test -x $Exe && ./$Exe
+   if [ -f $Dat ] ; then
+      size=`wc -c $Dat | awk '{print $1}'`
+   else
+      emsg "Could not determine size of type <$Type>"
+      size=$pad
+   fi
+   \rm -f $Exe $Src $Dat
+   echo $size
+}
+
+# First determine the file padding by using a type of known size.  This
+# padding comes from the FORTRAN standard, which states that each "record"
+# of an unformatted binary file is preceded AND followed by its byte count.
+pad=`sizeof integer*2`
+pad=`expr $pad - 2`
+
+# Now determine the size of the type actually requested.  Since no type
+# can have a size of 0, a return value of 0 indicates an error condition.
+expr `sizeof $Type` - $pad

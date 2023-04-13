@@ -1,0 +1,41 @@
+
+FUNCMAP HANDLER: BEGIN
+<This_Is_The_Blah_Funcmap
+blah1
+blah2 blah2 blah2 blah2 blah2 blah2 blah2 blah2
+blah3			blah3						blah3			blah3
+
+	blah4
+	continued ....
+>
+FUNCMAP HANDLER: END
+tcl_handler: line = <
+>
+tcl_handler: line = <let's
+>
+tcl_handler: line = <	pretend that this 
+>
+tcl_handler: line = <				is 
+>
+tcl_handler: line = <	some Tcl/Tk
+>
+tcl_handler: line = <code
+>
+tcl_handler: line = <NULL>
+
+preproc handler for funcmap IS installed
+preproc handler for inline_tcl IS installed
+preproc handler for DummY IS NOT installed!
+preproc handler for funcmap IS NOT installed!
+preproc handler for tcl IS NOT installed!
+tcl_handler: line = <
+>
+tcl_handler: line = <	another
+>
+tcl_handler: line = <		silly
+>
+tcl_handler: line = <			example
+>
+tcl_handler: line = <				snippet
+>
+tcl_handler: line = <NULL>

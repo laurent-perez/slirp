@@ -1,0 +1,19 @@
+#inline_c
+static ProcessGlobal *pg = new ProcessGlobal();
+#end
+
+#argmap(in, omit) ProcessGlobal*
+   $1 = pg;
+#end
+
+#argmap(out) long&
+   SLang_push_long($1);
+#end
+
+% Drop array length parameter from Computation::mult()
+#argmap(in, which=1) (double *array, unsigned long size)
+   $2 = $1_dim1;
+#end
+
+slirp_substitute_macro("BEGIN_C_DECL");		% deprecated form
+#define END_C_DECL				% preferred form

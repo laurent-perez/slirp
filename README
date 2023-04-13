@@ -1,0 +1,91 @@
+	   Last Updated:  $Date: 2008-01-29 16:05:36 $
+
+This README briefly describes SLIRP and how to install and use it.
+	
+SLIRP is a vectorizing code generator, aimed primarily at simplifying
+the process of creating modules for the S-Lang scripting language. It
+can dramatically reduce the time and effort required to make C, C++,
+and Fortran code callable directly from the S-Lang interpreter,
+automatically vectorize functions to take advantage of the powerful
+numerical and array capabilities native to S-Lang, and even generate
+Makefiles to automate the build process.  Another distinguishing feature,
+of special interest as multiprocessor and multicore desktops become
+more prevalent, is that SLIRP can generate parallelizable wrappers
+for OpenMP-aware compilers.
+
+Before building SLIRP you will need
+
+   1.  The S-Lang interpreter library (http://www.jedsoft.org/slang/)
+   2.  A C compiler
+   3.  And, optionally, C++ and Fortran compilers
+
+After unpacking SLIRP, a build sequence usually consists of three steps:
+
+   1.  configure the distribution
+   2.  build it
+   3.  install it
+
+For example, a standard Linux build would look like
+
+   linux%  cd <your_unpacked_slirp_distribution>
+   linux%  ./configure
+   linux%  make
+   linux%  make install
+
+Here S-Lang will be searched for in default locations and SLIRP
+will be built & installed accordingly.  Depending upon the speed of
+your computer, this process typically takes only a minute or two to
+complete.
+
+If you are unfamiliar with the configure/make/install process, or
+would like to customize your build and installation, or are
+experiencing build problems, run
+
+  ./configure --help
+
+to see what options are available.
+
+For example, while S-Lang is usually installed to /usr/local by default
+let's suppose you have it installed in a non-standard location like
+
+		/nfs/cxc/a1/i686
+		
+which the SLIRP configure script cannot find on its own;  in this case
+you can explicitly specify the location of S-Lang with
+
+  ./configure --with-slang=/nfs/cxc/a1/i686 ...
+
+Two other important configure options are --prefix and --exec-prefix,
+which let you customize where SLIRP -- and modules that it generates -- 
+will be installed.  By default these will be installed in subdirectories
+relative to where S-Lang was found, namely
+
+   Binary Files (dynamically loadable shared objects)
+
+   	$prefix/lib/slang/modules/           SLang 1
+	$prefix/lib/slang/v2/modules/        SLang 2
+
+   Human Readable Files (such as .sl scripts)
+
+	$exec_prefix/share/slsh/local-packages/
+
+For example, to set the value of $prefix to /home/bill, use
+
+   ./configure --prefix=/home/bill ...
+
+When configure is finished it's a good idea to inspect the Makefile
+that it generated, and make any final customizations.  Then, as shown
+above, building and installing SLIRP should involve nothing more than:
+
+   make
+
+followed by
+
+   make install
+
+although you may need root privileges to perform the last step.
+
+Plain text documentation for the package can be found in doc/text, while
+other formats are available online at
+
+	http://space.mit.edu/cxc/slirp/

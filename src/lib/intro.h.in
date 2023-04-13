@@ -1,0 +1,44 @@
+#include <stdlib.h>		/* SLIRP common {{{ */
+#include <unistd.h>
+#include <string.h>
+#include <stdarg.h>
+#include <ctype.h>
+#include <slang.h>
+
+#define SAFE_DEREF_OPAQUE(po)		(po == NULL ? NULL : po->instance)
+#define SAFE_DEREF_ARRAY(pa)		(pa == NULL ? NULL : pa->data)
+#define SLang_pop_array(x)		SLang_pop_array(x, 1)
+#define SLang_pop_string(x)             ( (SLang_peek_at_stack() == SLANG_NULL_TYPE && (SLdo_pop() || 1)) ? ((*x = NULL) || 1): SLang_pop_slstring(x))
+#define SLang_push_size_t		SLang_push_@size_t_mnemonic@
+#define SLang_push_ptrdiff_t		SLang_push_@ptrdiff_t_mnemonic@
+
+#define pop_defaultable(argno, kind, type, obj, value) \
+   (SLang_Num_Function_Args >= argno ? SLang_pop_##kind ( (type*)&obj) : ((obj = value) || ( (void*)&obj > (void*)0) ) )
+
+#ifdef __cplusplus
+#define LINKAGE "C"
+#else
+#define LINKAGE
+#endif
+
+#define USAGE(msg) \
+    {SLang_verror(SL_USAGE_ERROR, (char*)"Usage: %s", msg); return;}
+
+static void Slirp_usage(int i, int j, int flags);
+
+static int slang_abi_mismatch(void)
+{
+   long module_abi = SLANG_VERSION / 10000;
+   long app_abi    = SLang_Version / 10000;
+
+   if (module_abi != app_abi) {
+	SLang_verror(SL_APPLICATION_ERROR, (char*)
+		"S-Lang library abi mismatch\nmodule: %s, application: %s",
+		SLANG_VERSION_STRING, SLang_Version_String);
+	return 1;
+   }
+			        
+   return 0;
+} /* }}} */
+
+static char *slns;  /* slang namespace active at time of module load */

@@ -1,0 +1,13 @@
+# SLIRP vectorization benchmark data
+# Generated: Mon May 21 04:18:41 2007
+# Command:   ./gather cos 5
+# System:    tdc (sun4u SunOS)
+
+# Elements	cos		vcos
+
+       500	2.203e-04	2.169e-04	
+      5000	2.120e-03	2.111e-03	
+     50000	2.223e-02	2.210e-02	
+    500000	2.347e-01	2.386e-01	
+   5000000	7.023e+00	7.146e+00	
+  50000000	9.013e+01	9.147e+01	

@@ -1,0 +1,147 @@
+Remember that Fortran and C are different.  For example,
+
+   * Fortran:
+	o Passes by reference (address)
+	o Routine names are case insensitive
+	o Arrays are column-major
+	o Strings parameters also pass string length information
+
+   * C:
+	o Passes by value
+	o Names are case sensitive
+	o Arrays are row-major
+	o ``Strings'' are null terminated 
+
+
+Strings
+-------------
+
+Fortran entry points accepting a CHARACTER argument have an additional
+(and hidden from the caller) argument which denotes the length of the
+CHARACTER argument.  Fortran compilers are free to implement this
+string length feature any way they see fit:  some (like g77) add
+the string length arg to the end of the argument list, while others
+insert it immediately after the CHARACTER argument, and others (like
+VMS) use a descriptor structure.   By default SLIRP will append length
+arguments to the end of the arg list, however specifying the option
+"-fortran_strlen 1" (on the command line) will cause SLIRP to inline
+the length argument(s) (immediately following the CHARACTER argument
+it describes).
+
+String Arrays
+-------------
+
+Arrays of CHARACTER data are likewise problematic to transfer between
+C and Fortran scopes.  The char** type in C is not equivalent to an
+CHARACTER*(*) arr(*) type in Fortran;  the C type is an array of
+pointers to variable-length, NULL-terminated strings, while in Fortran
+all elements in an array of strings have equal length.  The Fortran
+type encompasses
+a contiguous region of memory, allowing an N-element array of M-length
+strings to be viewed as a single CHARACTER string of length NxM, while
+each element of the C array points to a distinct memory location.
+
+The pack_strings() and unpack_strings() routines in pack.c will be
+injected into a generated module when SLIRP detects the use of Fortran
+string arrays.  These routines take care of creating temporary char[M][N]
+variables to/from which a corresponding Fortran CHARACTER*(N) array(M)
+may be mapped.
+
+It is difficult -- without writing a compiler and/or slowing down
+SLIRP -- to decide whether an array is used purely for INPUT, OUTPUT,
+or both (INOUT).  This makes it difficult to decide whether a given
+Fortran array usage can be safely wrapped.  For instance,
+
+	subroutine unknown(arr)
+
+	character*(*)  arr(*)
+
+	...
+
+	end
+
+is perfectly legal Fortran.  The lack of size information makes it
+generally dangerous for such routines to modify the input arrays, e.g
+
+	arr(1) = 'something     '
+	arr(2) = 'something else'
+
+although this, too, is legal Fortran.
+
+In the absence of annotation SLIRP will leave string arrays parameters
+in place.  This allows the S-Lang and Fortran signatures to remain the
+same, and permits string arrays to be INPUT to the routine from S-Lang
+scope.  With this approach string arrays may also be OUTPUT to S-Lang
+scope -- through the in-place parameter -- IF the underlying Fortran
+routine changes the contents of the array it is passed.  
+
+If you actually want the string-array to be returned as a pure OUTPUT
+variable, this default mechanism is clumsy:  it requires an array be
+pre-allocated in S-Lang scope, e.g. as in
+
+   variable sring_arr = array_map(String_Type, &sprintf, "%-8d",[1:N]);
+
+prior to calling the routine
+
+	some_fortran_routine(param1, string_arr, param2, ...)
+
+It would be more natural to avoid pre-allocating the array, instead
+allowing it to be instantiated on the LHS of the invocation like
+
+	variable string_arr = some_fortran_routine(param1, param3, ... )
+
+To do this, we need to tell SLIRP that a parameter is in fact a pure
+OUTPUT value by applying a FTN_STR_ARRAY OUTPUT annotion as described
+in the documentation.  For this to work, though, SLIRP must be able to
+determine the number of elements in the array, as well the size of each
+element, from its declaration.  If it cannot, as with the "unknown"
+routine above, then the OUTPUT annotation will be rejected.
+
+Clearly, handling Fortran <--> C string arrays is an area where it
+would be useful to have INOUT support in SLIRP.
+
+---------------
+
+The Fortran support in SLIRP has been tested on a variety of codes, and
+even used to publish scientific papers (such as the Kerr Black Black
+hole model described in http://arxiv.org/abs/astro-ph/0510688).
+
+The sample code in examples/fortran has been exercised on a number
+of compilers, including:
+
+	Linux:		g77, gfortran, Intel Fortran 9.0, Lahey lf95
+	Solaris:	f77, f95
+	Mac OS/X 10.3:	g77, IBM XL Fortran, Absoft Pro Fortran 9.2
+
+Thanks to Lahey, Intel, IBM, and Absoft for making it easy to use
+evaluation copies of their compilers to test this software.
+
+Since version 1.7.7 SLIRP no longer employs f2c to assist with wrapper
+generation.  While this may introduce some instability in the near term,
+mainly from the fact that SLIRP recognizes a smaller subset of the
+Fortran language(s) than does f2c, it was necessary to avoid portability
+problems in the generated code.
+
+For example, the legacy f2c semantics for returning complex numbers
+TO C scope FROM Fortran functions (an additional argument prepended
+to the C function call signature, to accept the return value) are
+not employed by modern compilers (such as gfortran in GCC 4.x).
+Another portability issue is that the f2c 'complex' typedef shadows
+the 'complex' type offered by modern C compilers supporting the ANSI
+C99 standard, which can lead to undefined runtime behavior.
+
+Avoiding f2c also makes it easier for SLIRP users to wrap Fortran
+codes, since it removes an external dependency (and novice users may
+find f2c difficult to build from source), and fosters the automatic
+application of OUTPUT annotations to the return values of Fortran
+functions.
+
+If the reader is wondering why the venerable (and rather amazing)
+cfortran.h was not used here, the answer has several parts:  first,
+it did not appear to support gfortran at the time of this writing;
+second, as of v2.59 autoconf provides similar Fortran-wrapping
+functionality (which SLIRP now employs); third, at 120K it's more
+than half the size of the compressed SLIRP tarball, yet much of that
+content is for older compilers against which SLIRP will probably never
+be used; finally, I suspect using it would've made the generated
+code bigger.

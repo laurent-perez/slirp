@@ -1,0 +1,63 @@
+%-*- slang-*-
+private variable Slirp_Module_Dir = $1;
+private variable Slirp_Dir = $2;
+
+#if (path_basename (__argv[0]) == "slirp_exe")
+putenv (sprintf ("SLIRP_MODULE_DIR=%s", path_dirname (__FILE__)));
+putenv (sprintf ("SLIRP_DIR=%s", path_dirname (__FILE__)));
+#endif
+
+private define setup_paths ()
+{
+   variable p = getenv("SLIRP_MODULE_DIR");
+   if ((p != NULL) && (NULL != stat_file (p)))
+     Slirp_Module_Dir = p;
+   set_import_module_path (Slirp_Module_Dir + ":" + get_import_module_path());
+
+   p = getenv ("SLIRP_DIR");
+   if ((p != NULL) && (NULL != stat_file (p)))
+     Slirp_Dir = p;
+   prepend_to_slang_load_path (Slirp_Dir);
+}
+setup_paths ();
+import ("preproc");
+
+$1 = path_basename (__argv[0]);
+#if (($1 == "slirp") || ($1 == "slirp_exe"))
+() = evalfile ("slirp");
+
+#else  % slirpsh
+
+private define set_argv ()
+{
+   variable i;
+   _for i (1, __argc-1, 1)
+     {
+	variable arg = __argv[i];
+	if (arg[0] != '-')
+	  {
+	     __set_argc_argv (__argv[[i:]]);
+	     return;
+	  }
+#if (0)
+	() = fprintf (stderr, "%s: skipping unsupported option %s\n",
+		      __argv[0], arg);
+#endif
+     }
+
+   () = fprintf (stderr, "Usage: %s script.sl script-args...\n", __argv[0]);
+   exit (1);
+}
+set_argv ();
+
+$0 = __argv[0];
+if (not path_is_absolute ($0))
+$0 = path_concat (getcwd (), $0);
+() = evalfile ($0);
+#endif
+
+#ifexists slsh_main
+slsh_main ();
+#endif
+
+exit (0);

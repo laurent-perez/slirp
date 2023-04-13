@@ -1,0 +1,42 @@
+#argmap(out) spcomplex solution[2]
+   {
+   SLang_Array_Type *at;
+   double *elements;
+   int dims = 2;
+
+   at = SLang_create_array (SLANG_COMPLEX_TYPE, 0, NULL, &dims, 1);
+   if (at == NULL) {
+	SLang_verror(SL_INTRINSIC_ERROR, "could not allocate complex array");
+	return;
+   }
+   elements = (double*)at->data;	/* memcpy cannot be used here, b/c  */
+   *elements	 = $1[0].r;		/* FORTRAN complex uses single-prec */
+   *(elements+1) = $1[0].i;		/* reals for each component	    */
+   *(elements+2) = $1[1].r;
+   *(elements+3) = $1[1].i;
+   (void)SLang_push_array (at, 1);
+   }
+#end
+
+% FORTRAN compiler name mangling scheme is not exposed here (a good thing)
+
+#prototype
+   void qsolve(float*, float*, float*, spcomplex solution[2]);
+
+   % Morph some subroutines into functions by turning arg into an output value
+   void sub_multi(float*, float*, float *OUTPUT);
+
+   void outstrarr(FTN_STR_ARR OUTPUT);
+   void outstrarr2(FTN_STR_ARR OUTPUT);
+   void comtest(FTN_STR_ARR OUTPUT);
+
+   % FIXME: would like this to work so that result array can be OUTPUT
+   % void mmult(float*, float*, float *OUTPUT, int*, int*, int*);
+
+   % The bad_outstrarr annotation s/b rejected, for lack of array dim info
+   void bad_outstrarr(FTN_STR_ARR OUTPUT);
+#end
+
+#ignore
+   rzero
+#end

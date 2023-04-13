@@ -1,0 +1,43 @@
+#! /bin/sh
+
+sw=/nfs/cxc/a1
+
+if [ -d $sw ] ; then 
+   swarch=$sw/$ARCH
+else
+   swarch=/usr/local
+   CFLAGS=-O2
+fi
+
+if [ ! -d CVS ] || [ -n "$CFLAGS" ] ; then
+
+   # Ensure that local release builds are fast,	and have no debug info
+
+   prefix=$swarch
+
+   if [ "$CFLAGS" = "" ] ; then
+	case `uname` in
+	   SunOS)
+		CFLAGS=-xO2
+		FCFLAGS=-xO2
+		CXX=CC
+		CC=cc
+		;;
+	   *)
+		echo "Defaulting to GNU compiler settings ..."
+		CFLAGS="-O2"
+		FCFLAGS="-O2"
+		;;
+	   esac
+   fi
+else
+   CFLAGS="-g"
+   prefix=$sw/src/slgtk/devel
+   DEVEL_BUILD=true
+fi
+export CFLAGS CC CXX FCFLAGS DEVEL_BUILD
+
+make distclean >/dev/null 2>&1
+
+echo ./configure --prefix=$prefix --with-slang=$swarch "$@"
+./configure --prefix=$prefix --with-slang=$swarch "$@"

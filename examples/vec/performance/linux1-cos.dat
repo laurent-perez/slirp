@@ -1,0 +1,13 @@
+# SLIRP vectorization benchmark data
+# Generated: Mon May 21 11:55:16 2007
+# Command:   ./gather cos
+# System:    svoboda (i686 Linux)
+ 
+# Elements      cos             vcos
+ 
+       500      3.331e-05       3.473e-05
+      5000      3.191e-04       3.295e-04
+     50000      4.097e-03       4.208e-03
+    500000      4.059e-02       4.147e-02
+   5000000      4.102e-01       4.228e-01
+  50000000      4.147e+00       4.265e+00

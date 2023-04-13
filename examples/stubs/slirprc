@@ -1,0 +1,22 @@
+#argmap(final) double arr[3]
+   /* Argmap to exercise array matching.  The test of the func4 wrapper
+    * "succeeds" (return 1) only when this argmap is correctly matched.
+    * If argmap matching fails then the stubs returns 0 and the test fails */
+   if (5 > 4) {
+	(void) SLang_push_int (1);
+	goto free_and_return;
+   }
+#end
+
+#define _THIS_AND_THAT_3	3
+#undef _THIS_AND_THAT_3		% this comment will be ignored
+
+#define MULTIPLE_DEF1		99
+#define MULTIPLE_DEF1		100	% this will be honored, with a warning
+
+#define MULTIPLE_DEF2		100
+#undef  MULTIPLE_DEF2
+#define MULTIPLE_DEF2		101	% this will be honored, no warning
+
+#define STRING_MACRO		"dummy"
+#define REAL_MACRO		99.99

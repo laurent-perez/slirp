@@ -1,0 +1,41 @@
+			Test Machines Info
+
+i686linux:	svoboda.mit.edu	(aka linux1, to denote single-CPU)
+		(2) 1.8Ghz (256K cache) Athlon CPUs
+		2GB RAM
+		Debian Linux 3.1 (Sarge)
+		Linux Kernel 2.6.12.5
+		gcc 3.3.5
+
+solaris8:	starburst.mit.edu	(aka solaris1, to denote single-CPU)
+		(1) 750 Mhz SUNW, UltraSparcIII CPU
+		512 MB RAM
+		cc: Forte Developer 7 C 5.4 
+
+Each function was invoked N times (default==20) for each input size; the
+largest and smallest runtimes were discarded, and the rest were averaged
+to yield each entry in the .dat files.
+
+-O2 and -xO2 (Solaris) optimizations were employed for the SLIRP
+generated code, as well for S-Lang proper.  Always make sure that
+everything you are comparing has been compiled with the same
+optimization flags!!!!
+
+
+Example:
+
+% isis-script ../../perform.sl sin
+# SLIRP vectorization benchmark data
+# Generated: Fri May 25 16:04:56 2007
+# Command:   isis ../../perform.sl sin
+# Number of Iterations (func invocations) per array size: 20
+# System:    svoboda (i686 Linux)
+ 
+# Elements      sin             vsin
+ 
+       250      1.667e-05       1.956e-05
+       500      3.339e-05       3.411e-05
+      1000      6.283e-05       6.533e-05
+      3000      1.844e-04       1.923e-04
+      5000      3.092e-04       3.231e-04
+   ...

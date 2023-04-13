@@ -1,0 +1,166 @@
+# -*- sh -*-
+
+#---------------------------------------------------------------------------
+# List of modules and associated .sl files to install
+#---------------------------------------------------------------------------
+MODULES = preproc-module.so
+MODULE_VERSION	= `./mkversion.sh`
+
+SL_FILES = slirp*.sl
+LIB_FILES = lib/*.c lib/*.h lib/unix.mf
+#---------------------------------------------------------------------------
+# Installation Directories
+#---------------------------------------------------------------------------
+prefix = @prefix@
+exec_prefix = @exec_prefix@
+datarootdir = @datarootdir@
+MODULE_INSTALL_DIR = @MODULE_INSTALL_DIR@/slirp
+BIN_DIR=${exec_prefix}/bin
+SL_FILES_INSTALL_DIR = $(prefix)/lib/slirp
+LIB_FILES_INSTALL_DIR = $(prefix)/lib/slirp/lib
+HLP_FILES_INSTALL_DIR = $(SL_FILES_INSTALL_DIR)/help
+
+#---------------------------------------------------------------------------
+# C Compiler to create a shared library
+#---------------------------------------------------------------------------
+CC		= @CC@
+CFLAGS		= @CFLAGS@
+LDFLAGS		= @LDFLAGS@
+CC_SHARED 	= @CC_SHARED@
+
+#---------------------------------------------------------------------------
+# Location of the S-Lang library and its include file
+#---------------------------------------------------------------------------
+SLANG_INC	= @SLANG_INC@
+SLANG_LIB	= @SLANG_LIB@ -lslang
+
+#---------------------------------------------------------------------------
+# Additional Libraries required by the module
+#---------------------------------------------------------------------------
+SLIRP_INC	=
+SLIRP_LIB	=
+X_XTRA_LIBS	= @X_EXTRA_LIBS@
+MODULE_LIBS	= $(SLIRP_LIB) # $(X_LIBS) $(X_XTRA_LIBS)
+RPATH		= @RPATH@
+
+#---------------------------------------------------------------------------
+# Misc Programs required for installation
+#---------------------------------------------------------------------------
+INSTALL		= @INSTALL@
+INSTALL_DATA	= @INSTALL_DATA@
+INSTALL_MODULE	= @INSTALL_MODULE@
+MKINSDIR	= ../autoconf/mkinsdir.sh
+RM		= rm -f
+LN		= ln -s
+#---------------------------------------------------------------------------
+# DESTDIR is designed to facilitate making packages.  Normally it is empty
+#---------------------------------------------------------------------------
+DESTDIR =
+DEST_MODULE_INSTALL_DIR = $(DESTDIR)$(MODULE_INSTALL_DIR)
+DEST_BIN_DIR = $(DESTDIR)$(BIN_DIR)
+DEST_SL_FILES_INSTALL_DIR = $(DESTDIR)$(SL_FILES_INSTALL_DIR)
+DEST_LIB_FILES_INSTALL_DIR = $(DESTDIR)$(LIB_FILES_INSTALL_DIR)
+DEST_HLP_FILES_INSTALL_DIR = $(DESTDIR)$(HLP_FILES_INSTALL_DIR)
+#---------------------------------------------------------------------------
+UPDATE_VERSION_SCRIPT = $(HOME)/bin/update_changes_version
+#---------------------------------------------------------------------------
+LIBS = $(SLANG_LIB) $(MODULE_LIBS) $(LDFLAGS) $(RPATH) $(DL_LIB) -lm
+INCS = $(SLANG_INC) $(SLIRP_INC)
+SLIRP_EXE = slirp_exe
+
+all: $(MODULES) $(SLIRP_EXE)
+
+#---------------------------------------------------------------------------
+# Put Rules to create the modules here
+#---------------------------------------------------------------------------
+preproc-module.so: preproc-module.c version.h
+	$(CC_SHARED) $(INCS) preproc-module.c -o preproc-module.so $(LIBS)
+version.h: ../changes.txt
+	if [ -x $(UPDATE_VERSION_SCRIPT) ]; then \
+	  $(UPDATE_VERSION_SCRIPT) ../changes.txt ./slirputils.sl ./version.h; \
+	fi
+$(SLIRP_EXE): Makefile slirp.bot
+	@echo "Creating $(SLIRP_EXE)"
+	@echo  '#!/usr/bin/env slsh' > $(SLIRP_EXE)
+	@echo '$$1 = "$(MODULE_INSTALL_DIR)";' >> $(SLIRP_EXE)
+	@echo '$$2 = "$(SL_FILES_INSTALL_DIR)";' >> $(SLIRP_EXE)
+	@cat slirp.bot >> $(SLIRP_EXE)
+	@chmod +x ./$(SLIRP_EXE)
+#---------------------------------------------------------------------------
+# Regression tests
+#---------------------------------------------------------------------------
+check:
+	slsh test/test.sl > test.out
+	diff test/test.ref test.out
+#---------------------------------------------------------------------------
+# Installation Rules
+#---------------------------------------------------------------------------
+install_directories:
+	$(MKINSDIR) $(DEST_MODULE_INSTALL_DIR)
+	$(MKINSDIR) $(DEST_SL_FILES_INSTALL_DIR)
+	$(MKINSDIR) $(DEST_HLP_FILES_INSTALL_DIR)
+	$(MKINSDIR) $(DEST_LIB_FILES_INSTALL_DIR)
+	$(MKINSDIR) $(DEST_BIN_DIR)
+
+install_modules:
+	@for X in $(MODULES); \
+	do \
+		Y=$$X.$(MODULE_VERSION); \
+		YDEST=$(DEST_MODULE_INSTALL_DIR)/$$Y; \
+		echo $(INSTALL_MODULE) $$X $$YDEST; \
+		$(INSTALL_MODULE) $$X $$YDEST; \
+		if [ "$$?" != "0" ]; then \
+		  exit 1; \
+		fi; \
+		$(RM) $(DEST_MODULE_INSTALL_DIR)/$$X; \
+		$(LN) $$Y $(DEST_MODULE_INSTALL_DIR)/$$X; \
+	done
+#
+install_slfiles:
+	@for X in $(SL_FILES); \
+	do \
+		echo $(INSTALL_DATA) $$X $(DEST_SL_FILES_INSTALL_DIR); \
+		$(INSTALL_DATA) $$X $(DEST_SL_FILES_INSTALL_DIR); \
+		if [ "$$?" != "0" ]; then \
+		  exit 1; \
+		fi; \
+	done
+#
+install_libfiles:
+	@for X in $(LIB_FILES); \
+	do \
+		echo $(INSTALL_DATA) $$X $(DEST_LIB_FILES_INSTALL_DIR); \
+		$(INSTALL_DATA) $$X $(DEST_LIB_FILES_INSTALL_DIR); \
+		if [ "$$?" != "0" ]; then \
+		  exit 1; \
+		fi; \
+	done
+#
+install_hlpfiles:
+	@for X in $(HLP_FILES); \
+	do \
+		echo $(INSTALL_DATA) $$X $(DEST_HLP_FILES_INSTALL_DIR); \
+		$(INSTALL_DATA) $$X $(DEST_HLP_FILES_INSTALL_DIR); \
+		if [ "$$?" != "0" ]; then \
+		  exit 1; \
+		fi; \
+	done
+#
+install_bin:
+	echo $(INSTALL) $(SLIRP_EXE) $(DEST_BIN_DIR)/slirp; \
+	$(INSTALL) $(SLIRP_EXE) $(DEST_BIN_DIR)/slirp; \
+	if [ "$$?" != "0" ]; then \
+	  exit 1; \
+	fi;
+	-cd $(DEST_BIN_DIR); ln -s slirp slirpsh
+#
+install: all install_directories install_modules install_slfiles \
+         install_hlpfiles install_bin install_libfiles
+
+clean:
+	-/bin/rm -f $(MODULES) *~ "#*" *.o test.out $(SLIRP_EXE) lib/*~
+distclean: clean
+	-/bin/rm -f config.h Makefile slirpconf.sl slirpsh \
+	  lib/intro.h lib/unix.mf
+.PHONY: check clean install distclean all
+

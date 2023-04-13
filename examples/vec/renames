@@ -1,0 +1,5 @@
+#rename sin	vsin 	% These are renamed so as to distinguish them
+#rename sqrt	vsqrt	% from the native S-Lang implementations
+#rename cos	vcos
+#rename strlen	vstrlen
+#rename hypot   vhypot

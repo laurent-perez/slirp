@@ -1,0 +1,65 @@
+#! /bin/sh
+
+CleanUp=1
+SynchVersions=0
+Dest=">/dev/null"
+
+while getopts csuv opt 2>/dev/null ; do
+   case $opt in 
+
+	c) CleanUp=0;;
+	u) DiffOpt=-u;;
+	s) SynchVersions=1 ;;
+	v) Dest="";;
+   esac
+done
+
+configify()
+{
+   eval admin/configify $1 $Dest
+}
+
+check_synched()
+{
+   eval diff $DiffOpt $1.in $1.IN $Dest
+   if [ $? -ne 0 ] && [ "$Dest" != "" ] ; then
+	echo "*** SYNCH OF $1 WITH $1.in IS NEEDED ***"
+	SynchableFiles="$SynchableFiles $file"
+   fi
+}
+
+Files="builtins.sl slirputils.sl"
+
+for file in $Files ; do
+    configify $file
+done
+
+if [ "$Dest" = "" ] ; then
+   echo 
+   echo "Press <Enter> key to clear screen and view CVS diffs ..."
+   read dummy
+   clear
+   for i in 1 2 3 4 5 ; do
+       echo
+   done
+   echo "---------------------------  Changes  -----------------------------"
+   echo
+fi
+
+for file in $Files ; do
+    check_synched $file
+done
+
+if (($SynchVersions)) ; then
+   for file in $SynchableFiles ; do
+	cp ${file}.IN ${file}.in
+   done
+fi
+
+if [ $CleanUp -eq 0 ] ; then 
+   exit 0
+fi
+
+for file in $Files ; do
+   \rm ${file}.IN
+done

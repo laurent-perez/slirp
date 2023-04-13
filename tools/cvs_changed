@@ -1,0 +1,28 @@
+#! /bin/sh
+
+# This script provides a concise list of all files in the current CVS 
+# tree which are different from the last version committed.
+#
+# The -e switch provides a way to ensure those files are marked as 
+# "currently being edited".  This is useful to work around an apparent
+# CVS bug, wherein edit tags for files being edited by user X (as set
+# by "cvs edit" ) are lost when user X issues, in a fresh directory, a
+# "cvs checkout" command for the given package.
+#
+# Judging from newsgroup postings it seems that others have encountered
+# this bug, too, but surprisingly enough it appears to remain unfixed.
+
+if [ "$1" = "-e" ] ; then
+   Operation="cvs edit"
+else
+   Operation="echo"
+fi
+
+Dir=`pwd`
+Package=`basename $Dir`
+
+for file in `cvs diff . 2>&1 | grep -v Diffing | grep "^RCS" |\
+			sed -e "s/^.*$Package\///g" -e "s/,v$//g"` ; do
+   $Operation $file
+
+done

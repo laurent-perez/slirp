@@ -1,0 +1,4 @@
+This directory contains a few simple C++ classes and functions which are
+intended to exercise the nominal C++ wrapping facility within SLIRP.  The
+code is not intended to exemplify best practices of OO design in general
+or C++ programming in particular.

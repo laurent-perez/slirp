@@ -1,0 +1,83 @@
+
+# MODULE_NAME (required) and OTHER_* (optional) macros s/b defined by caller
+SH_EXT		= @SH_EXT@
+MODULE          = $(MODULE_NAME)-module$(SH_EXT)
+GLUE            = $(MODULE_NAME)_glue
+SO		= @SO@
+SO_MAJOR_NAME	= @SO_MAJOR_NAME@
+SO_MAJOR_VER	= @SO_MAJOR_VER@
+SO_MINOR_VER	= @SO_MINOR_VER@
+
+PROFILE		= #-pg
+CFLAGS		= @CFLAGS@ $(OTHER_CFLAGS)
+LDFLAGS		= @LDFLAGS@
+OPENMP_CFLAGS	= @OPENMP_CFLAGS@		# Used for both compile/link
+
+CC		= @CC@
+SO_CFLAGS	= $(PROFILE) @SO_CFLAGS@ @SLANG_INC@ -I. -I../..
+SO_LINK_FLAGS	= @SO_LINK_FLAGS@ $(LDFLAGS)
+C_COMPILE	= $(CC) $(SO_CFLAGS) $(OTHER_CFLAGS) -c
+C_LINK		= $(CC) $(SO_LINK_FLAGS)
+SO_DEP_LIBS	= @SO_DEP_LIBS@
+DL_LIB		= @DYNAMIC_LINK_LIB@
+
+CXX		= @CXX@
+CXXFLAGS	= $(SO_CFLAGS)
+CXX_COMPILE	= $(CXX) $(CXXFLAGS) -c
+CXX_LINK	= $(CXX) $(SO_LINK_FLAGS)
+CXX_LIBS	= @CXX_LIBS@
+
+SLIRPROOT	= ../..
+SLIRPSCRIPT	= $(SLIRPROOT)/slirp.sl
+SLIRP_DEBUG	=
+SLIRP		= $(SLIRPROOT)/src/slirp_exe $(SLIRP_DEBUG)
+DIFF		= diff @COLLAPSE_BLANKS_FOR_REGR_TESTS@
+
+SLANG_VERSION	= @SLANG_VERSION@
+SLANGLIB	= @RPATH@ @SLANG_LIB@ -lslang @TERMCAP@
+MODULE_INSTALL_DIR = .
+
+FC		= @FC@
+FCFLAGS		= @FCFLAGS@
+FCLIBS		= @FCRPATH@ @FCLIBS@
+FCLIBS_NAMES	= @FCLIBS_NAMES@
+FORTRAN_COMPILE = $(FC) $(FCFLAGS) -c
+FORTRAN_LINK	= $(FC)
+
+RM		= \rm -f
+CP		= \cp
+
+all: $(PRE_ALL) $(MODULE) $(OTHER_ALL)
+
+.SUFFIXES: .cc .f
+
+.c.o:
+	$(C_COMPILE) -c $< -o $@
+.cc.o:
+	$(CXX_COMPILE) $< -o $@
+.f.o:
+	$(FORTRAN_COMPILE) $?
+
+clean:
+	$(RM) *.o *$(SH_EXT) *~ $(GLUE).c $(OTHER_CLEAN) errs.msg \
+	  test.log ignored.txt
+
+distclean: clean
+	$(RM) $(OTHER_DISTCLEAN)
+
+# This is intended for internal development use only
+WARN_PROTO=-Wstrict-prototypes -Wmissing-prototypes
+WARN_NEX=-Wnested-externs
+WARN_LLONG=-Wno-long-long
+warnings:
+	$(RM) $(GLUE).o
+	@echo
+	-CFLAGS="-Wall -W -pedantic -Winline \
+		@SLANG_INC@  -I. \
+		$(WARN_NEX) -Wpointer-arith -Wcast-align -Wshadow \
+	    $(WARN_PROTO) $(WARN_LLONG) " ; export CFLAGS ; \
+	$(MAKE) -e $(GLUE).o > /dev/null 2> errs.msg
+	@if [ -s errs.msg ] ; then \
+	   cat errs.msg ; \
+	   false ; \
+	fi

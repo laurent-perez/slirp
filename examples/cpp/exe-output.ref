@@ -1,0 +1,29 @@
+Computation: 	Pi
+Id:		2
+Result:		3.14159
+Pi destructor
+Computation destructor
+Computation: 	Pi
+Id:		2
+Result:		3.1615
+Computation: 	Pi
+Id:		2
+Result:		3.1615
+Pi destructor
+Computation destructor
+short value = 1000
+int value = 33000
+int value = -66666
+short value = 2260
+double value = 3e+09
+double_value[0] = 1.1
+double_value[1] = 2.2
+double_value[2] = 3.3
+double_value[3] = 4.4
+double_value[0] = 0
+double_value[1] = 1
+double_value[2] = 2
+double value = 999.999
+ProcessGlobal::report(): ok!
+Pi destructor
+Computation destructor

@@ -1,0 +1,47 @@
+#! /usr/bin/env slsh
+
+require("ascii");
+
+_auto_declare = 1;
+
+titles = ["\\# elements", "", "cos", "sin", "sqrt", "strlen" ];
+argc = 0;
+
+vmessage("\\documentclass[11pt]{article}");
+vmessage("\\usepackage{multirow}");
+vmessage("\\begin{document}");
+vmessage("\\thispagestyle{empty}");
+vmessage("\\begin{tabular}{|c|c|c|c|c|c|c|}");
+vmessage("\\\hline");
+vmessage("& %s\\\\", strjoin( titles, " & "));
+vmessage("\\cline{2-7}");
+
+while (argc < __argc - 1, argc++) {
+
+   data = __argv[argc];
+   platform = path_sans_extname(data);
+   data = readtab(data);
+   nrows = length(data.col1);
+
+   vmessage("\\multirow{%d}{*}{%s} &", 2*nrows - 1, platform);
+
+   variable i = 0, ;
+   while (i < nrows) {
+	if (i > 0)
+	   () = printf("   & ");
+	vmessage("   \\multirow{2}{*}{%.0e}", data.col1[i]);
+	vmessage("\t & S-Lang & %4.3e & %4.3e & %4.3e & %4.3e\\\\",
+	     	data.col2[i], data.col4[i], data.col6[i], data.col8[i]);
+	vmessage("\t\\cline{3-7}");
+	vmessage("\t & & SLIRP & %4.3e & %4.3e & %4.3e & %4.3e\\\\",
+	     	data.col3[i], data.col5[i], data.col7[i], data.col9[i]);
+	vmessage("   \\cline{2-7}");
+	i++;
+   }
+
+   if (argc < __argc)
+	vmessage("\\hline");
+}
+
+vmessage("\\end{tabular}\n");
+vmessage("\\end{document}");

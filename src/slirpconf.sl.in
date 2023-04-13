@@ -1,0 +1,40 @@
+variable
+  SLIRP_MAX_VEC_ARGS = @nvec@,
+  SLIRP_HAVE_FORTRAN = @HAVE_FC@,
+  SLIRP_HAVE_LONG_LONG = @HAVE_LONG_LONG@,
+  SLIRP_HAVE_STDINT_H = @HAVE_STDINT_H@,
+  SLIRP_FORTRAN_MANGLE_UPCASE = @FC_MANGLE_UPCASE@,
+  SLIRP_FORTRAN_MANGLE_SUFFIX = "@FC_MANGLE_SUFFIX@",
+  SLIRP_FORTRAN_MANGLE_USCORE = @FC_MANGLE_EXTRA_USCORE@,
+  SLIRP_OPENMP_FLAGS = "@OPENMP_CFLAGS@",
+  SLIRP_INJECT_DIR = path_concat (path_dirname (__FILE__), "lib");
+
+
+% Forward declarations
+define slirp_map_char(); define slirp_map_uchar();
+define slirp_map_short(); define slirp_map_ushort();
+define slirp_map_int(); define slirp_map_uint();
+define slirp_map_long(); define slirp_map_ulong();
+define slirp_map_llong(); define slirp_map_ullong();
+define slirp_map_float(); define slirp_map_double();
+define slirp_map_ldouble();
+define slirp_map_unsupported();
+
+define slirp_map_int16(ctype)  { slirp_map_@int16_mnemonic@(ctype);  }
+define slirp_map_uint16(ctype) { slirp_map_@uint16_mnemonic@(ctype); }
+define slirp_map_int32(ctype)  { slirp_map_@int32_mnemonic@(ctype);  }
+define slirp_map_uint32(ctype) { slirp_map_@uint32_mnemonic@(ctype); }
+define slirp_map_int64(ctype)  { slirp_map_@int64_mnemonic@(ctype);  }
+define slirp_map_uint64(ctype) { slirp_map_@uint64_mnemonic@(ctype); }
+define slirp_map_float32(ctype){ slirp_map_@float32_mnemonic@(ctype); }
+define slirp_map_float64(ctype){ slirp_map_@float64_mnemonic@(ctype); }
+define slirp_map_float96(ctype){ slirp_map_@float96_mnemonic@(ctype); }
+
+% This function gets called from slirptypes.sl after the slirp_map_*
+% functions have been initiated. 
+define slirp_config_map_types ()
+{
+   slirp_map_@size_t_mnemonic@("size_t");
+   slirp_map_@ptrdiff_t_mnemonic@("ptrdiff_t");
+   slirp_map_@bool_mnemonic@("bool");
+}

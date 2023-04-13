@@ -1,0 +1,146 @@
+% Miscellany (opaque type mapping, macros, inline_c, etc) {{{
+slirp_define_opaque("KDatum",NULL,"ksink_datum_destroy");
+slirp_define_opaque("ks_struct");
+
+% Old symbol-ignore method 
+ignored_macros = [ "KSINK_IGNORABLE_MACRO", ignored_macros ];
+ignored_variables = [ "KSINK_IGNORABLE_INT2", ignored_variables];
+
+#copy int FD_PROXY { int fd }
+
+#inline_c
+#define MAXSTR 99
+#include "stdio.h"
+#end
+
+#define BAD1(x) 	x				% this w/be rejected
+#define GOOD1     999					% this w/be accepted
+#define							% this w/be rejected
+slirp_define_macro("	   BAD2(y,z)", "(z, y)");	% this w/be rejected
+slirp_define_macro("  	GOOD2   	", "\"HI!\"");	% this w/be accepted
+#define GOOD3						% this w/be accepted
+% }}}
+
+#argmap (  in, 		which=2		 ,  usage="float_array  " ) (long nelems, float  array[]) (int i, short s) % {{{
+   printf("Array input to %s is of dimension: %d\n",$funcname, $2_ndims);
+   $1 = ($1_type) $2_dim1;		/* inmap1 */
+   i = (int) $1;
+   s = 100;
+#end % }}}
+
+% These rules transform ksink_mult2() into the equivalent of ksink_mult() {{{
+% (the long* and short* copies will be no-ops, since they do won't match
+% anything, and are included here so as to better test the parser)
+#copy double *OUTPUT {long* huey,	double* result,   short*dewey}
+#clear double*result
+#copy double *OUTPUT {double *result}
+% }}}
+
+#argmap (	in	  ) char ** % {{{
+   /* inmap2: demonstrate that inmap1 will take precedence, i.e.
+      this fragment is not injected into the emitted code */
+#end % }}}
+
+% In map defined only so as to exercise subsequent #clear directive  {{{
+#argmap		( in) double op2
+#end
+#clear double op2 % }}}
+
+#copy(long nelems, float  array[]) {     (long nelems, char **)	}
+
+#argmap (in) char **NULL_TERMINATED_STRING_ARRAY (int size) % {{{
+   {
+   char **copy = $1;
+   size = 0;
+   while (*copy++)
+	size++;
+   }
+   printf("\nNull terminated string array size: %d elements\n",size);
+#end % }}}
+
+
+#argmap(in, omit) (unsigned long int ul, double d) (char tmp[MAXSTR]) % {{{
+   strcpy(tmp, "JustTesting");
+   /* Accept zero args, and always pass these constants instead */
+   $1 = 332211;
+   $2 = 999.111;
+#end % }}}
+
+% Note that, since ksink.h has not been read yet and -noautotype is not
+% specified,  KInt will be automatically mapped to an opaque type;
+% when ksink.h is later read, this mapping is replaced by KInt typedef
+
+#argmap(in) KInt (int blah) % {{{
+   blah = $1;
+#end	% }}}
+
+#argmap(final) KInt (int copy) % {{{
+   copy = $argnum;
+   printf("Finalizing arg %d of %s (with local copy)\n", copy, $funcname);
+#end % }}}
+
+#ignore % New (recommended) symbol-ignore method {{{
+					KSINK_IGNORABLE_MACRO2
+dummy1,		% There is no implementation for this,
+
+	dummy2% ... or this
+
+   dummy3, 		% ... or these
+
+% comments within ignore directives should operate as they do w/in S-Lang proper
+ksink_ignorable_func		% this supports annotating the ignored func
+% 			lists in a 
+					% variety of ways
+   KSINK_IGNORABLE_INT
+#end % }}}
+
+#argmap(in, which=[1,3]) (double	  *DA1  ,   long nelems	,	   double*DA2) (int tmp) % {{{
+   tmp = $argnum;
+   $2 = $1_dim1;
+   if ($2 != (long) $3_length) {
+	SLang_verror(SL_INTRINSIC_ERROR,"%s: array size mismatch",$funcname);
+	$cleanup;
+	return;
+   }
+#end % }}}
+
+% Annotations for ksink_copy_string {{{
+#argmap(in, which=1) (char* src, char *dest, long len)
+   $3 = strlen($1);
+   $2 = SLmalloc($3 + 1);
+#end
+
+#argmap(out) char *dest
+   if (SLang_push_malloced_string($1) == -1)
+	SLfree($1);
+#end
+
+#typedef int Ignore
+
+#retmap(omit) Ignore % {{{
+      /* #retmap(omit) Ignore */
+#end % }}}
+% }}}
+
+#argmap(final) KDatum* % {{{
+   /* no-op, just to exercise parameter substitutions with opaque types */
+   { KDatum **p = &$1; (void) p;}
+#end % }}}
+
+#argmap(out)  KDatum * * copy % {{{
+   (void) SLang_push_opaque(KDatum_Type,  $1, 0);
+#end % }}}
+
+#prototype % {{{
+
+   void  ksink_print_array_nts(char **NULL_TERMINATED_STRING_ARRAY);
+
+   % Note the default value, thus allowing the func to be called with 0 args
+   void  ksink_arg_dropper_1(unsigned int ul=112233);
+
+   % Exercise multi-return value handling
+   FILE* ksink_fopen (char *name, char *mode, unsigned long *OUTPUT,
+						unsigned short *OUT);
+
+   Ignore ksink_copy_string (char *src, char *dest, long len);
+#end % }}}

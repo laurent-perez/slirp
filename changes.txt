@@ -1,0 +1,681 @@
+-*- mode: text; mode: fold -*-
+Changes since v1.9.9
+0. New maintainer: JED
+1. Reorganized the code.
+2. slirp is now an slsh script that uses a slirp-specific module
+   instead of being a modified version of slsh.
+3. Fixed leaks that could occur when executing usage statement.
+4. Fixed an access error associated with freeing opaque types that
+   contain circular references back to the object.
+5. Tweaked some of the code that gets injected to avoid some gcc
+   warnings.
+6. Since the code is architecture-specific, the library files get
+   installed in ${prefix}/lib/slirp/.
+7. src/slirpconf.sl.in: slirp_map_unsupported was not defined.
+8. src/slirp.bot: (slripsh) If something looks like an option.  This
+   was added because slgtk calls slirpsh with -n, which was ok when
+   slirpsh was a modified version of slsh.
+9. SLgtk calls slirputils.sl instead of loading it through slirp.sl.
+   So make sure slirputils.sl requires slirpconf.sl.
+10. moved CHANGES to changes.txt for consistency with other slang
+    modules.
+11. Added support for long constants to deal with SLgtk on 64 bit
+    systems.
+12. slirp --version was missing a newline
+13. Added SLIRP_VERSION_NUMBER macro to generated code.
+14. src/lib/opaques.c: if the owns_ref field is non-0, do not free the
+    instance associated with the opaque type.
+15. Makefile tweaks involving clean/distclean targets
+16. src/Makefile.in: misplaced "done" in the install_bin target
+17. examples/fortran/Makefile: Change $(FC) to "$(FC)" in test.
+18. examples/kitchensink/Makefile: changed to use ../Makefile.inc
+19. configure: Fixed a problem with configure finding mismatched
+    slang.h and libslang files.  Also added -ltermcap for systems that
+    require it.
+20. configure: If $host_os is unsupported, issue a warning message.
+21. Fixed some Fortran issues: common blocks with character*N arrays
+    were not being wrapped properly.  LDFLAGS was not being used by
+    the regression tests creating some failures.
+22. src/*.sl: emit changed to slirp_emit since the callback
+    functions (declarer, etc) must return strings instead of call emit.
+23. examples/*/Makefile: Change $FC to "$FC" in test statements.
+24. src/slirpmaps.sl: The constant_macro function was not always being
+    called with a string value.
+25. configure: parse /etc/ld.so.conf for system libs
+26. src/slirp*.sl: Better handling of enums.  Line numbers tracked a
+    bit better.
+27. src/slirputils.sl: prev change did not account for preproc
+    statements in enums.
+28. Map the preprocessor mod operator (%) to "mod" for evaluation by
+    the interpreter.
+29. newer versions of slang do not permit literal integers to be
+    called as functions, e.g., "0(0)".  This was getting generated
+    when slirp encountered an unknown macro.  The fix is to call a
+    function that generates 0.
+30. The which_qualifier regular expression failed for argument lists
+    consisting of 10 or more parameters (used by #argmap).
+31. Some command line arguments to the slirp program were not being
+    handled (Laurent Perez).
+32. Another workaround for the illegal code described in change #29.
+33. When passing a character*N string value fortran, use a
+    space-padded N character string.
+34. Code following a C++ "using" statement was being incorrectly parsed.
+
+Previous Versions {{{
+Changes since v1.9.8:
+ 1.	Strengthen parsing of function declarations embedded within
+	#if/#else/#endif conditionals (uncovered with libgif wrapping).
+ 2. 	Support #ignore-ing of intrinsic variables.
+ 3. 	Header files used to generate code now:
+	. will be #include-d even when init fragment is not generated
+	. or optionally excluded with new -noincludes option
+	. no longer contain path to code 
+ 4.     updated config.guess, config.sub to latest versions
+
+Changes since v1.9.7:
+ 1.	Avoid edge case where new SLang types could be defined more than once.
+ 1.	Patches from J. Davis to eliminate harmless compiler warnings.
+
+Changes since v1.9.6:
+
+	****************************************************************
+	****** THIS RELASE FORMALLY DISCONTINUES SLANG 1 SUPPORT *******
+	******       SLANG 2.1 or later is now required          *******
+	****************************************************************
+
+ 1.	Significantly increased the functionality, correctness, flexibility,
+	& comprehensiveness of C++ support: two highlights are that C++ style
+	syntax may be used in S-Lang scope [e.g. object.method()], complete
+	with inheritance resolution, and that classes defined with 'struct'
+	keyword are now wrapped as classes.  See the docs for more details.
+ 2.	New types created by SLIRP now have "_Type" suffix in their type names.
+	This fosters more natural construction of C++ objects in S-Lang scope,
+	b/c the class name can be used as the constructor name, disambiguated
+	from the name of the DataType_Type assigned to the class.
+ 3.	Renamed -debug option to -sldb
+ 4.     Multiple levels of verbosity with -g (optional =INTEGER_LEVEL arg value)
+ 5.	Support (usage="<string_literal>") qualifier in #retmap annotation
+ 6.	String-valued arguments are now NULL-able, by default
+ 7.	Support intrinsic variables of opaque type, e.g. so that pointers to
+	private (to C scope) variables may be passed to/from S-Lang scope.
+	For example, consider this snippet of code from OpenMPI:
+
+		extern struct ompi_communicator_t ompi_mpi_comm_world;
+		#define MPI_COMM_WORLD (&ompi_mpi_comm_world)
+
+	Although ompi_mpi_comm_world can't be used in S-Lang as a struct
+	(because it's definition is hidden), we can automatically wrap
+	MPI_COMM_WORLD for S-Lang because it's just a pointer.
+ 8.	Establish compatibility with SLang 2.2
+ 9.	More tolerant parsing of Fortran EXTERNAL statements, though wrapping
+	of procedures with EXTERNAL function arguments remains unsupported
+10.	Fixed parsing of 2-char operators tokens within preproc conditionals
+
+Changes since v1.9.5
+ 1.	Corrected typo in help output (only appeared against S-Lang 1)
+ 2.	Help output (and man page) was not reflecting -nocom switch
+ 3.	Fixed common block bug: explicitly sized members were being
+	declared improperly in wrappers, e.g. real*8 foo as real*8*8 foo
+ 4.	Fixed typo in definition of HAVE_STDINT_H configure macro, seen
+	when stdint.h is not found (reported by Jim Bodie at RIT).
+
+Changes since v1.9.4
+ 1.	Corrected bug in #else clause handling during macro preprocessing
+	(reported by John Houck at space dot mit dot edu)
+ 2.	Improved support for parsing macros with continued lines
+ 3.	Look for stdint.h during configure & auto map int32_t, etc types
+ 4.	Improvements in Fortran wrapping:
+	. include files are now supported
+	. 'entry' keyword is now supported
+	. -nocom switch can be given to shrink module size by not
+	   wrapping common blocks when they are not desired
+ 5.	Better ignoring of C++ comments embedded within C comments
+ 6.	Improved EOF detection when parsing conditional compilation blocks
+ 7.	Enhanced man pages with hyphen patch from Rafael L. at Debian
+ 8.	Postscript docs discontinued, due to Latex conversion problems
+
+Changes in v1.9.4
+
+ 1.	Provide S-Lang access to Fortran COMMON block variables, via:
+	  get_commblock_list:	gives names of all common blocks in module
+	  get_commblock:	retrieves a CommBlock handle to a given block
+	  get_commblock_value:  retrieves value of named variable in block
+	  set_commblock_value:  assigns value to named variable in block
+	Common block variables may also be set/get with struct.field
+	notation, such as
+		variable com1 = get_commblock("com1");
+		print(com1.energy);
+		com1.energy = 1.1F;
+ 2.	Support passing CHARACTER arrays to/from Fortran calls.
+ 3.	New -fortran_strlen option, to customize where hidden string length
+	args s/be placed in wrappers of Fortran calls accepting CHARACTER args
+	As a result, the internal FTN_STR_LEN argmap has been removed.
+ 4.	Allow object code(s) to be specified at slirp invocation ... they
+	will be treated as if they were part of an -ldflags specification
+	and added as link dependencies to the generated module.
+ 5.	Improve Makefile distclean: target (Rafael Laboissiere, at, Debian)
+ 6.	Generated makefiles:
+	. Now show SLIRP wrapper command used to create them
+ 	. Have corrected .SUFFIX rule
+	. Fortran compiler FC variable now includes path for disambiguation
+	. If <modname>.sl is found at generation time then 'make install'
+	  will install it to the S-Lang/slsh subdirectory in $prefix/share
+ 7.	Modified some internal usages of array/function dereferencing, for
+	compatibility with SLang 2.1.x.
+ 8.	New verbose help (-vh/-vhelp/--vhelp) option, so that rarely used
+        options do not clutter normal -help output
+ 9.	Fortran parameter() statements now recognized for array dimensions.
+10.	Arguments passed to Fortran routines for array dimensions are now
+        automatically made optional from S-Lang scope.
+11.	OUT annotations now have precedence over IN when both match a pattern.
+12.	All Fortran function wrappers now emitted to a single .f file, instead
+	of one output .f file for each input .f file wrapped.
+13.	Search for .dylib shared libs when establishing S-Lang installation
+	location on Darwin, and .dll.a libs on cygwin.
+14.	Improved documentation on installation, including a README with
+	explicit tips on using configure options to find S-Lang, etc.
+
+Changes in v1.9.3
+ 1. 	New -debug option for using S-Lang debugger (S-Lang 2 only)
+ 2. 	Improved parsing of uncommon const usages in argument type decls.
+ 3.	Ensure -vec flag is reflected in generated Makefiles
+ 4.	Don't alloc return value in vectorized wrappers before validating input
+ 5. 	Fixed struct handling bug reported by Laurent Perez (laurent perez
+	AT unicaen, fr)
+
+Changes in v1.9.2
+ 1.	Vectorized code may be parallelized for multiprocessors with -openmp
+	(requires OpenMP >= 2.0 support in compiler).  See examples/openmp.
+ 2.	Propagate C/C++ PIC compile flags to Fortran codes, too
+ 3.	Detect whether fortran compiler properly handles list-directed
+	I/O with commas, and cause regression test to fail if not
+ 4.	Generated Makefiles:
+ 	. should now work by default on wider set of mixed FORTRAN/C/C++
+	  scenarios (issue reported by dmaitra at science dot uva dot nl)
+	. now include install: and uninstall: targets
+ 	. use chcon tool, when available, to avoid potential SELinux
+	  obstacles when loading generated modules.
+ 5.	Streamlined configure compiler variable settings (watch for breakage!)
+ 6.	Moved examples/opengl to examples/gl.
+
+Changes in v1.9.1
+ 1.	Internal mods to vectorization code in support of OpenMP
+	parallelization; will be activated in next release.
+ 2.	Fixed problem in Makefiles generated from: slirp -make ... /dev/null
+ 3.	Fixed edge case where zero-element array could potentially cause
+	vectorization code to generate an exception or loop forever.
+
+Changes in v1.9
+
+ 1.	Added support for automatic vectorization of wrapper functions
+ 2.	To enlarge the default coverage of wrapped APIs, when autotyping is
+	on (the default) typedef'd structs not explicitly mapped by your
+	interface file will be mapped to opaque types with a free() finalizer
+ 3.	examples/triv module renamed kitchensink, because that's what it is!
+ 4.	Corrected bug with default values for C funcs with 1 arg of basic type
+ 5.	Usage statements for ref/array args now reflect "[]" instead of "_ptr"
+ 6.	More and better documentation
+ 7.	Fix configure bug when no FORTRAN compiler detected (Laurent Perez)
+ 8.	Most of emitted code is now embedded within fold markers
+ 9.	New #rename directive, equivalent to -rename command line switch
+10.	Allow more than 9 arguments (ugh!!) in an argmap
+11.	Fixed C++ support bugs:
+	- #ifndef after full-line C++ comment was being ignored
+	- conditional compilation directives w/in C++ block not being honored
+	- overloaded methods with zero args now always dispatched correctly
+12.	For flexibility, allow destination type(s) of #copy annotations to
+	be undefined at the time the #copy is issued
+13.	Proxy annotation for string* arrays can now accept a NULL default value
+14.	Generated stub code now includes globals defined w/in the interface
+15.	Introduced $cleanup parameter, to avoid memory leaks w/in annotations
+	when they cause wrapper to exit prematurely (e.g. with an error)
+16.	Enhanced support for multi-dimensional C arrays like double foo[2][2]
+17.	Opaque wrappers for pointer array types (e.g. double**) now reflect
+	their C type (e.g. as double_ptr_ptr) rather than mapping to void_ptr
+18.	Usage stmts for FORTRAN funcs now more accurately reflect arrayness
+19.	Arrays transparently converted to/from FORTRAN column-major layout
+20.	Allow #argmap(ignore) blocks to be specified in a single line; i.e.,
+	to implicitly terminate sans an #end directive
+21.	New #argmap(setup) method, which allows code to be injected into a
+	function wrapper prior to the marshaling of its arguments from S-Lang
+22.	New -ignore option to tune where/how ignored symbols are emitted: by
+	default they now go to ./ignored.txt (not stderr)
+
+Changes in v1.7.9
+ 1.	Ensure SLSH -n switch is used in all examples, and generated makefiles
+ 2.	slirp_debug_pause() no longer included by default in generated
+	modules; use new -d option to force its inclusion
+ 3.	Established Windows portability, under MinGW 5.0.2 (gcc 3.4.2)
+	and CygWin 1.5.18 (gcc 3.3.3)
+	** Requires as-yet unreleased patches to S-Lang 2.0.6 ***
+
+	NOTE FOR CYGWIN 1.5.19 USERS: there appears to be a buggy
+	interaction between CygWin 1.5.19 and GCC 3.4.4, which can
+	cause the host application to abort when loading C++ DLLs.
+	(example: www.cygwin.com/ml/cygwin/2005-08/msg00061.html)
+	This causes the SLIRP C++ regression tests to fail, and
+	effectively prevents the use of SLIRP-generated C++ modules.
+
+Changes in v1.7.8
+ 1.	Enhanced preprocessing capabilities:
+	- support conditional compilation directives in C/C++ headers
+	- slirp_substitute_macro() was ill-conceived, and has been
+	  deprecated; its replacement is slirp_define_macro()
+	- new #define annotation: cleaner equivalent of slirp_define_macro()
+ 	- new #undef annotation : companion to #define
+	- Allow preprocessing tokens within enumerations
+ 2.	New examples:
+	- complete examples/opengl demo (exercises preprocessor and -stubs)
+	- show how to use an OUTPUT argmap to effectively morph a FORTRAN
+	  subroutine into a function
+ 3.	Ensure -tmapin/-tmapout do not reflect stubbed/temp types
+ 4.	Improved line number diagnostics when reporting malformed code
+ 5.	Enhanced Makefile generation:
+ 	- fix IFLAGS typo
+	- ensure code generated by-stubs is reflected in generated Makefiles
+ 6.	Extensive restructuring of the documentation, to reflect new features
+	and better organize the content for existing ones.
+
+Changes in v1.7.7
+ 1.	Discontinued use of f2c, as it leads to portability dead-ends.
+	FORTRAN source is now parsed directly by SLIRP, which simplified
+	support for new compilers.  New strategy verified compatible
+	with g77, gfortran, Solaris f77 and f95, Intel Fortran 9.0,
+	Lahey lf95, IBM xlf, and Absoft Pro Fortran 9.2.  Newer Fortan
+	semantics (e.g. modules, OO, freeform layout) remain unsupported.
+ 2.	Specifying /dev/null as input is now equivalent to specifying an
+	empty header file: an empty module template will be generated
+ 3.	Bulletproof builds and tests against SLSH environment variables
+ 4.	C++ support enhancements:
+	. Improved makefile generation for C++ code
+	. New -c++ option to coerce interpretation of a header as C++
+	. S-Lang string arrays may now be transparently passed to C++ as
+	  arrays of string class objects (see misc code in examples/cpp)
+	  (in -cfront mode routines with string array args WILL NOT be wrapped)
+	. Function defs inlined into C++ header files will now be wrapped
+ 5.	'ignore' method added to #argmap() annotation, a powerful feature
+	which allows wrappers to omitted for functions based upon their
+	argument signatures, instead of merely their names
+ 6.	Relaxed 1.7.5 change #11: $(MODULE_NAME).mf is now just a
+	fallback, if either 'Makefile' or 'makefile' already exist
+
+Changes in v1.7.6
+
+ 1.	Runing on non-existent files now issues warning, rather than abort
+ 2.	Unused #define macros no longer substituted to empty string by default
+ 3.	Better platform-specific uninstall/clean targets (motivated by Marko)
+ 4.	No longer choke on preprocessor directives within enums (reported
+	by Laurent Perez and Rafael Laboissiere)
+ 5.	Updated config.guess and config.sub to 2005 versions
+ 6.	Include slirp.1 and slirpsh.1 man pages
+ 7.	Examples updates (R.Laboissiere @ Debian) :
+	  - makef: test no longer captures make output
+	  - fortran: disable single-precision complex multiplication test,
+	    until full compatibility with gfortran is established
+
+Changes in v1.7.5
+ 1.	Bugfix for parsing multiple comment strings within a single line
+ 2.	Strengthened #define macro handling, by performing substitutions
+	on a macro value prior to determining if it denotes a constant
+ 3.	Activated mappings for "long long" and "unsigned long long" types
+ 4.	Added builtin annotations [void *ARRAY_2_VOIDP, void *ANY_2_VOIDP]
+	which facilitate the passing of either arrays or arbitrary objects
+	to wrapped routines as void* arguments.  More details in docs.
+ 5.	Code may now be inlined into a generated module initialization
+	fragment, by specifying the 'init' qualifier to the #inline directive
+ 6.	typedefs may now be ignored via the #ignore directive
+ 7.	Added late binding mechanism to enable wrapping of macros which
+	reference symbols that were undefined when the #define was first seen
+ 8.	Ensure const-ness of destination type is propagated by #copy directive
+ 9.	Allow comments w/in #retmap open/close directives (will be stripped)
+10.	Local proxy variables defined by #argmap(in) annotations may now be
+	safely referenced w/in subsequent annotations, e.g. #argmap(final)
+11.	To avoid problems on filesystems which do not support mixed-case (e.g
+	Apple OS/X), generated makefiles now always named $(MODULE_NAME).mf
+12.	Changed -v option to mirror slsh (now causes slirp to echo path of
+	each .sl file loaded) ; former -v option is now --version
+13.	SLIRP now installs files to its own directory within $prefix/share,
+	instead of $prefix/share/slsh, in part to fix the autoloading bug
+	reported by Marko Mahnic (marko dot mahnic at email dot si)
+14.	At install time, rebuild slirpsh with embedded SLSH_CONF_DIR and
+	SLSH_PATH vars pointing to $prefix, instead of the build directory
+15.	Ensure that configure LDFLAGS setting is propagated to examples
+
+Changes in v1.7.4
+ 1.	Support NULL default value for array/reference types in C++
+ 2.	The -v (version) option now also emits the S-Lang library version
+ 3.	Make reasonable attempt at cleaning up temp files generated by f2c
+ 4.	Don't use semi-private funcs _SLpath_find_file & _SLang_get_class_type
+ 5.	Fix bug seen when stripping C comments embedded w/in a func prototype
+ 6.	Type mapping of C++ bool is now customized by configure script
+ 7.	Version info (from -v) now includes revision level of current release
+ 8.	New C++ examples for bool type and omission of an array length parameter
+ 9.	C++ overloaded method dispatcher is now less strict when matching
+	arrayed args, so that S-Lang may make the ultimate decision as to
+	whether an array may be implicitly cast when calling a wrapper.
+10.	Tweaked -print option implementation, which had fallen into disrepair
+11.	get/set wrappers are now generated for scalar public C++ class fields
+12.	Global variables may now be ignored, either via ignored_variables[], OR
+13.	The #ignore annotation has been generalized to accept the name of any
+	kind of ignorable symbol (function, macro, or global variable)
+14.	int *OUT now shorthand for int *OUTPUT; ditto for similar #argmaps
+15.	new -stubs option to generate empty implementations for input headers;
+	this supports exercising the module interface without the need to link
+	in the underlying library (or any of its dependencies)
+16.	Demonstrate this with new examples/stub sample code
+17.	Added $<n>_length metadata substitution, equivalent to $<n>_dim<0>
+18.	Introduced -rename option as synonym for -mapnames (now deprecated);
+	either form may now be specified multiple times at invocation
+
+Changes in v1.7.3
+ 1.	#argmap(out) with C++ reference parameter now works as expected
+ 2.	-mapnames <R> NULL may now be used to replace R with empty string
+ 3.	Support comments w/in #argmap open/close directives (will be stripped)
+ 4.	Use (3) to introduce fold markers w/in examples/triv/slirprc
+
+Changes in v1.7.2
+
+ 1.	Introduced NT_STR_ARRAY and NT_STR_ARRAY_FREE #typedefs, and
+	associated #retmaps, to facilitate the return of S-Lang string
+	arrays from null-terminated C string arrays.  See docs for details.
+ 2.	Fix code generated from annotations containing multiply-indirected
+	pointer (reported by Chris Stawarz)
+ 3.	Function name transformations implied by -mapnames option are now
+	correctly reflected w/in usage statements (submitted by Chris Stawarz)
+
+Changes in v1.7.1
+
+ 1.	Added simple vector class (Vec) to C++ example
+ 2.	Performance enhancements for C++ method dispatching in SLang2 modules
+ 3.	Correct signature generated when #argmap is used to omit the object
+ 	instance (first arg) from a method call (wmclaugh@cfa.harvard.edu)
+
+Changes in v1.7.0
+
+ 1.	More accurate usage message for single-arg C++ funcs w/ default value
+ 2.	Better support for C++ reference semantics (still only input, though)
+ 3.	alloca() a single variable for struct args, instead of 2 (instance, ptr)
+ 4.	Generalization: use typeclass-specific callbacks for declaration,
+	marshal/referencing/return, instead of checking each individual arg
+ 5.	Support use of opaquely typed variables w/in annotation code fragments,
+	which also induced a change to the signature of SLang_pop_opaque()
+ 6.	Added __process_name intrinsic variable, to reflect the process argv[0]
+ 7.	Added '-m symbol' switch to importify utility, which allows main() to
+	be overridden by renaming it to symbol()
+ 8.	Former -l option (list opaque type hierarchy) renamed to -otree
+ 9.	Added experimental -make switch (emits a make file that can be used
+	to automate compilation of the module) and several related switches:
+	.  -I to specify dirs to search for headers at generate/compile time
+	.  -L to specify dirs to search at link time
+	.  -l to specify libs to pull in at link time
+	.  -ldflags as an alternative/supplement to -L and -l
+10.	Added examples/makef to demonstrate makefile generation functionality
+11.	Added __find_file_in_path intrinsic function, to support -I
+12.	Relative path prefix on an input header is retained in generated code
+13.	#define macros whose values are simple references to other macros, or
+	simple logical combinations of them, are now wrapped, too
+14.	Global, statically-sized arrays of scalars defined w/in a header are
+	now also reflected in S-Lang scope (as read-only arrays)
+15.	Introduced proxy annotation [#argmap(in) int FD_PROXY] to allow S-Lang
+	FD_Type [returned by open()] to be passed as an int file descriptor
+16.	Added transparent support for passing S-Lang File_Type [returned by
+	fopen(), etc] variables to wrapped functions in place of FILE*
+17.	New #inline_c annotation, which can simplify module creation by
+	inclusion of hand-written code directly within interface file
+18.	New SLprep_handler_passthru(handler,pattern) C function (and S-Lang
+        preproc_handler_passthru wrapper), which permits lines beginning with
+	the given preprocessor pattern to pass through a currently active
+	preprocessor extension callback without complaint, e.g.
+		#inline_c
+		#define FOO 1
+		#include "stdio.h"
+		#end
+	regardless of where the pattern begins on the input line.  Previously
+	this was possible only by indenting the content, e.g.
+		#inline_c
+		 #define FOO 1
+		 #include "stdio.h"
+		#end
+	but that approach was non-obvious and too fragile.
+19.	Fixed problem of #argmaps returning multiple values in reverse
+	order (reported by cstawarz@cfa.harvard.edu)
+20.	Several enhancements for C++ references and enumerated types,
+	suggested by Warren McLaughlin (wmclaugh@cfa.harvard.edu)
+21.	Compatibility tweaks for latest SLang2 development snapshots.
+
+Changes in v1.5.4 (02/08/05)
+
+ 1.	Support omit qualifier for #argmap(in) (suggested by dburke@cfa)
+ 2.	Split 'warnings' target out from 'test' target in top-level Makefile
+ 3.	Usage statements are now generated even for zero-arg functions
+ 4.	Added internal docs clarifying the normal form used for arg lists
+ 5.	Reflect latest SLang2 exception messaging model in regression tests
+
+Changes in v1.5.3 (02/03/05)
+
+  1.	Ensure that usage statements for #argmap(in) annotations are reflected
+	in generated code but not propagated when the #argmap is #copy-ied
+  2.	Ensure fortran wrappers have opaque type code (dburke@cfa.harvard.edu)
+  3.	Ensure necessary #defines are present when -noinit is used (dburke@cfa)
+  4.	Added examples/fortran sample code, which also mixes in C routines
+  5.	Unified C, C++, and FORTRAN example builds with common Makefile.inc
+  6.	#retmap annotations are now also deleted by #clear directives
+  7.	#argmap(out) bugfix for char* types (cstawarz@cfa.harvard.edu)
+  8.	Added support for optional (fortran) qualifier to #prototype directive
+  9.	Support both single- and double-precision complex FORTRAN types, which
+	interchangeably map to the double-precision SLANG_COMPLEX_TYPE
+ 10.	Added #argmap(in) which transparently allows strings to be passed
+	from S-Lang scope to FORTRAN without a length parameter
+ 11.	Extend (4) from the 1.5.2 release so that it applies even in the case
+	when an overloaded func is invoked with an unsupported arg signature
+ 12.	Enhanced the preprocessor token extension module so that:
+	- it may now be explicitly activated/deactivated
+	- elision blocks (such as #iffalse/#endif) are properly honored
+ 13.    Activate #typedef directive, which was added (but disabled) in v1.5
+ 14.    Enhancements to the multiple-parameter #argmap functionality:
+ 	- A sequence of N args to a wrapped function may now be mapped to a
+	  set of M (1<=M<=N) S-Lang function parameters, via a S-Lang array
+	  index expression; previously only scalar which=n (M=1) was supported
+	- more flexible matching of unnamed #argmap params with named 
+	  function prototype parameters
+	- which= qualifier now optional (all args will be marshaled when absent)
+ 15.	Prevent modules from loading into apps built w/ different S-Lang abi
+
+Changes in v1.5.2 (01/10/2005)
+
+  1.	Turn off strict aliasing for newer GCC compilers.
+  2.	Changed #prototype grammar to require that function declarations be
+	terminated with semicolons (as in C).  Previously they were optional,
+	but the new approach supports better spacing / prettier formatting.
+  3.	Update S-Lang 2 test output for examples/triv module.
+  4.	The usage message emitted for an overloaded function or class method
+	will now display all of the variations in which it may be called.
+
+Changes in v1.5.1 (12/29/04)
+
+  1)	To maintain breadth of platform coverage, support older Solaris
+	C++ compilers in examples/cpp code.
+  2)	Augmented docs and sample code to elucidate the semantics of
+	references w/in the S-Lang C api, especially the fact that they
+	allow values to be passed in only one direction: from a function
+	wrapper to a S-Lang variable.
+  3)	Ensure that popped slstrings are always freed, even though 99.9%
+	of time omitting such does not appear to cause a leak (suggested
+	by Chris Stawarz, cstawarz@cfa.harvard.edu)
+
+Changes in v1.5.0 (Beta releases through 12/19/04)
+
+  1)	Support function annotations, which provide powerful and flexible
+        means of customizing the generated code.  For example, a C function
+	prototyped as having M inputs and N outputs may be called from
+	S-Lang as though it were a function of M' inputs and N' outputs.
+  2)	This is achieved by customizing the bundled slsh with the S-Lang
+	preprocessor extension module (see ./preproc), and using it to add
+	#argmap, #funcmap, #prototype, #retmap, #ignore, etc directives.
+  3)	Add initial support for C++, which includes:
+	. wrapping of overloaded functions and those with default values,
+	  but not templates or operators
+	.  generation of pure/standalone C wrappers from C++ code (i.e.,
+	   containing no S-Lang C api calls) via new -cfront option
+	Sample usage given in new ./examples/cpp directory.
+  4)	Initial support for SLang 2
+  5)	Macros may now be wrapped as if they were fully prototyped
+	functions, via slirp_map_macro().
+  6)	Moved toggle_error_hook() function to new standalone test framework
+	package [ TESS, the (Te)st (S)ystem for (S)-Lang]
+  7)	Added default type mapping for void* and 'unsigned long int' types.
+  8)	The distinction between arguments explicitly declared as arrays
+	(e.g. float f[]) and those ambiguosly declared as arrays or refs
+	(e.g. float *f) has been deprecated.  Thus slirp_map_array() has
+	also been deprecated.
+  9)	Address bugs seen while parsing rather complex glibc headers
+	(submitted by Paul Boekholt, paul@boekholt.com)
+ 10)	Perform macro substitutions upon args within function prototypes.
+ 11)	SLIRP now automatically maps all unknown types (be they function
+	return values OR args within function parameter lists) to the
+	opaquely-typed void_ptr.  The new -noautotype option turns this off.
+ 12)    Prevent simultaneous loading of incompatible SLIRP-based modules, by
+	introducing ABI version #, which will be checked at load time.
+ 13)	Sharpen the saw (resulting in better performance and smaller modules)
+	. emit fewer, at times many, lines of code
+	. perform only a single pass over input files
+	. code is now emitted to a single file
+	. obviating the -d <dir> switch, which has been eliminated
+	. except for module init func, all generated funcs are now static
+	. remove support for deprecated -consts, -init, and -opaques switches
+ 	. better recognition of function pointer and enum args
+ 	. exhibit use of new #ignore directive (2) in OpenGL and MySQL examples
+	. strip "int" return types from C wrappers for FORTRAN subroutines
+	  (dburke@cfa.harvard.edu)
+
+Changes in v1.0.7 (07/09/04):
+
+  1)  Integrate support for opaque initializers, contributed by Chris
+      Stawarz (cstawarz@cfa.harvard.edu), and reflect it w/in docs.
+
+Changes in v1.0.6 (07/08/04):
+  1)  Load resource file prior to generating consts/types, to ensure
+      that requests to ignore macros are properly honored.
+  2)  New content added to example module (slirp/examples/triv)
+  3)  Minor internal preparations for supporting opaque initializers.
+
+Changes in v1.0.5 (06/16/04):
+  1)  Better parsing of nested structs and unions
+  2)  Scalar and string variables defined w/in processed headers are now
+      wrapped as S-Lang vars; this is useful, e.g., to automatically
+      propagate library version info to S-Lang scope
+  3)  Cleaner elision of 'const' and 'volatile' qualifers
+  4)  Added -tmapout and -tmapin switches, which facilitate sharing
+      typemaps amongst distinct invocations of SLIRP
+
+Changes in v1.0.2 (04/30/04):
+
+  1)  Added default mapping for ptrdiff_t
+  2)  Small doc improvements, which include mention of macro substitution
+  3)  Include SLIRP version within generated initialization fragment
+  4)  Added -refscalars command line switch, to permit the passing of
+      slang scalars to functions expecting arrays or references (see docs)
+  5)  Updated triv module example to demonstrate (4).
+
+Changes in v1.0.1 (03/12/04):
+
+  1)  added default mapping for size_t
+  2)  enlarged class of automatically generated type mappings, to include
+      "simple" typedefs of the form
+  
+  		typedef  <existing_type>  <new_type_name>;
+
+  3)  Reflected this w/in examples/slirprc.opengl, by removing about 20 lines.
+  4)  Clarified usage of ignored_funcs list w/in docs, and added example
+  5)  Tolerate C++ style comments used in C code (even though they're bad!)
+
+Changes in v1.0.0 (1/29/04):
+
+  1)  now downloadable/installable as standalone package 
+  2)  function names in wrapped lib may be mapped to different names
+      in slang layer by using new -mapnames switch
+  3)  slirp now performs two internal passes on its input; there is
+      no need to invoke it twice (once to generate types, and once
+      for code); init fragments are also now generated by default
+  4)  thus the -consts, -opaques, and -init switches are now no-ops
+  5)  idempotence guarantee: output files now always generated from scratch
+  6)  --noinit switch added, to omit generation of init fragment
+  7)  moved patch_intrin_table() func from SLgtk into SLIRP proper,
+      as Slirp_patch_ftable(), for use in any module
+  8)  generate module-specific calls to Slirp_patch_ftable(), to remap
+      dummy types in func tables to opaque typeids assigned at runtime
+  9)  deprecated search for / use of $HOME/.slirprc, since most of the
+      content in a resource file is by definition library-specific
+  10) fixed bug when nearly-obsolete -nopop option is used with opaques
+      (reported by davis@space.mit.edu)
+  11) clarify w/in docs the role of opaque finalizers
+
+
+Changes in v0.9.9 (01/09/04):
+
+  1)  functions which return arrays of indeterminate size (like int*)
+      are longer rejected, but rather will have their return values
+      mapped to opaque pointers
+  2)  demonstrate this in slirp/examples/triv sample code
+  3)  added sample slirprc for MySQL to ./examples
+  4)  moved slgtk_debug_pause() util func from SLgtk internals to SLIRP
+      proper [renamed to slirp_debug_pause()], for use in all modules
+  5)  ditto for _toggle_error_handler() utility func
+  6)  improved and reorganized documentation 
+
+
+Changes in v0.9.8 (12/24/03):
+
+  1)  support import() of >1 SLIRP-generated module into single app
+  2)  support nested resource files, and sharing of type definitions,
+      with new slirp_include_rc(filename) function
+
+
+Changes in v0.9.7:
+
+  1)  extended type ancestry support: an opaque type may now have a
+      hierarchy of ancestors, instead of just one.
+
+
+Changes in v0.9.6 (9/17/2003):
+
+  1)  added ignored_macros[] array, which serves same purpose for #define
+      macros as ignored_functions[] does for functions (see docs)
+  2)  generalized opaque.c: moved remaining pop_*_or_null funcs from
+      SLgtk proper to SLIRP, for accessibility within any module
+  3)  renamed opaque.[c|h} to slirptypes.[c|h] to reflect generalization
+  4)  better support for C comments embedded w/in function prototypes
+
+
+Changes in v0.9.5 (9/11/2003):
+
+  1)  Ensure that the bizarre obfuscation performed by f2c of suffixing
+      two underscores to FORTRAN routine names containing one or more
+      underscores is excised by SLIRP from the S-Lang scoped func name.
+  2)  Prepend $PWD to S-Lang load path at startup, to ensure that even
+      a vanilla slsh has a chance of finding a local $PWD/slirprc file.
+
+
+Changes in v0.9.3 (8/16/2003):
+
+  1)  added configure script to SLIRP subdirectory of SLgtk
+  2)  a wee bit more documentation
+  3)  created SLIRP web page at http://space.mit.edu/~mnoble/slirp,
+      and added link to "SLIRP-ing FORTRAN into S-Lang" talk
+
+
+Changes in v0.9.2 (8/4/2003):
+
+  1)  initial support for generating modules from FORTRAN 77 source
+      (see slirp/doc for more details)
+  2)  exit with non-zero status if there is _any_ error whilst generating
+      code for _any_ (of the potentially multiple) input files, which
+      gives make a better chance at identifying code generation failures
+  3)  streamlined code emission for multiple input files: when both a 
+      module name (-m option) AND multiple input files are specified,
+      generated code/constants/functable entries/etc will be emitted to
+      only one file (prefixed with the module name), rather than one file
+      per input file name (prefixed with the input file name stem)
+  4)  More stringent tests of #define macros for intrinsic const emission
+  5)  Consolidated most state control variables into SlirpController struct
+}}}

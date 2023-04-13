@@ -1,0 +1,31 @@
+
+			S-Lang Preprocessor Extension
+			    mnoble@space.mit.edu
+
+		Last Updated: $Date: 2008-03-14 20:18:06 $
+
+
+This directory contains an experimental extension to the S-Lang preprocessor,
+which provides the capability for S-Lang programmers to register new tokens
+for the preprocessor to recognize, and callback functions to act upon them.
+
+It is being used in SLIRP to support function annotations, such as allowing
+"array size" parameters to be omitted from calls made in S-Lang scope,
+moving return values from the parameter list onto the return value list,
+injecting user-defined fragments into generated code, etcetera.
+
+While preprocessing S-Lang scripts in this manner does have certain
+limitations (e.g. preprocessed code is stripped during byte-compilation),
+especially in the context of inlining code, this approach keeps SLIRP
+resource files much cleaner than would be possible with other approaches.
+
+Preprocessor callbacks may be defined (e.g. with preproc_handler_add)
+immediately after loading the extension.  Before they are used, however,
+the preprocessor extension must be "activated" with preproc_activate().
+
+Splitting the handler definition and callback activation in this manner
+allows the S-Lang interpreter to use its native file loader for scripts
+which do not define custom preprocessor tokens.  This maximizes the
+predictability and runtime performance of loading scripts at startup,
+and adds flexibility, since the processor extension can also be
+deactivated with the preproc_activate() function.

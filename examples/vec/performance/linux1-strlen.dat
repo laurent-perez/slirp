@@ -1,0 +1,12 @@
+# SLIRP vectorization benchmark data
+# Generated: Fri Apr 28 14:37:20 2006
+# Command:   ./gather 2
+# System:    svoboda (i686 Linux)
+
+# Elements	strlen	vstrlen
+
+200		8.128e-05	5.889e-06
+2000		1.053e-03	4.844e-05
+20000		1.530e-02	1.933e-03
+200000		6.181e-01	2.079e-02
+2000000		5.149e+01	2.136e-01

@@ -1,0 +1,8 @@
+Usage:  double = imptest(short,string,int,string,short,double,float)
+
+Usage:  mmult(double[m,n],double[n,k],double[m,k] [,int=m,int=n,int=k])
+
+String_Type Array is read-only
+
+Complex_Type Array is read-only
+

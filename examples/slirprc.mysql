@@ -1,0 +1,13 @@
+
+% Simple MySQL example, last tested against version 3.23.49-8.5
+
+slirp_define_opaque("MYSQL");
+slirp_define_opaque("MYSQL_RES");
+
+accepts_null_args["mysql_init"] = [1];
+
+#ignore
+mysql_ssl_set
+mysql_ssl_cipher
+mysql_ssl_clear
+#end

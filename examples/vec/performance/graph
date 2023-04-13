@@ -1,0 +1,87 @@
+#! /usr/bin/env isis-script
+
+if (__argc == 1) {
+   usage("%s: [-ps] <benchmark-file-1> [, <benchmark-file-2> ...]",
+						path_basename(__argv[0]));
+   exit(0);
+}
+
+require("ascii");
+_auto_declare = 1;
+
+argc = 0;
+!if ( strncmp(__argv[1],"-ps", 2)) {
+   argc++;
+   batch = 1;
+}
+else
+   batch = 0;
+
+
+while (argc < __argc - 1, argc++) {
+
+   data = __argv[argc];
+   tokens = strtok(data, "-");
+   platform = tokens[0];
+   computation = strtok(tokens[1], ".")[0];
+
+   data = readtab(data);
+   nelems = data.col1;
+
+   if (batch) {
+      device = platform+"-"+computation + ".ps";
+      vmessage("Plot written to %s",device);
+      device += "/cps";
+   }
+   else
+      device = "/xwin";
+
+   () = open_plot(device);
+
+   set_frame_line_width(3);		% darker == better for viewgraphs
+   set_line_width(3);			% and journal papers
+
+   % adjust viewport, so bigger chars can be rendered nicely
+#ifexists set_outer_viewport
+   variable dims = struct {xmin, xmax, ymin, ymax};
+   dims.xmin = 0.15; dims.xmax = 0.85; dims.ymin = 0.15; dims.ymax = 0.85;
+   set_outer_viewport(dims);
+#else
+   _pgsvp(0.15, 0.85, 0.15, 0.85);
+#endif
+   charsize(1.5);
+   point_style(-3);
+   point_size(2);
+
+   xlog;
+   if (computation == "strlen") {
+	y_lower = 8;
+	y_upper = 270;
+	ylog;
+	ratio = data.col2 / data.col3;
+	y_label = "array_map(strlen) / SLIRP wrapper";
+   }
+   else {
+	y_lower = 0.25;
+	y_upper = 2.0;
+	ratio = data.col3 / data.col2;
+	y_label = "SLIRP wrapper / S-Lang intrinsic";
+  }
+
+   yrange(y_lower, y_upper);
+
+   label("Array Size", y_label, "");
+
+   %color(2);  % red
+   color(1);  % black
+   plot(nelems, ratio);
+
+   _pgptxt(log10(10000), 1 + ((y_upper-1)/2.0), 0, 0,
+		"\\fr " + sprintf("%s (%s)", computation, platform));
+
+   if (batch)
+      close_plot();
+}
+
+!if (batch)
+   sleep(9999);

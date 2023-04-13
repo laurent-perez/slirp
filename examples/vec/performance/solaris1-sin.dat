@@ -1,0 +1,13 @@
+# SLIRP vectorization benchmark data
+# Generated: Mon May 21 03:13:16 2007
+# Command:   ./gather sin 5
+# System:    tdc (sun4u SunOS)
+
+# Elements	sin		vsin
+
+       500	2.170e-04	2.209e-04	
+      5000	2.116e-03	2.139e-03	
+     50000	2.207e-02	2.232e-02	
+    500000	2.341e-01	2.399e-01	
+   5000000	7.006e+00	7.138e+00	
+  50000000	8.992e+01	9.125e+01	

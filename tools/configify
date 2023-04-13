@@ -1,0 +1,46 @@
+
+# Simplify regeneration (in development tree, equipped with FORTRAN) of:
+#	slirputils.sl.in <-- slirputils.sl
+#	builtins.sl.in <-- builtins.sl 
+
+newfile=${1}.IN
+sed \
+    \
+    \
+   -e 's/\(SC.root[ 	][ 	]*=[    ]\)\(".*";\)/\1"@abs_builddir@";/' \
+   -e 's/\(SC.version[ 	][ 	]*=[    ]\)\(.*;\)/\1"@SLIRP_VERSION_STRING@";/' \
+   -e 's/\(SC.openmp_flags[ 	][ 	]*=[    ]\)\(.*;\)/\1"@OPENMP_CFLAGS@";/' \
+    -e 's/\(revision[ 	][ 	]*=[    ]\)\(.*;\)/\1"@SLIRP_REVISION@";/' \
+    -e 's/#if true/#if @HAVE_FC@/' \
+    -e 's/SC.have_fortran = [01];/SC.have_fortran = @HAVE_FC@;/'\
+    -e 's/SC.have_long_long = [01];/SC.have_long_long = @HAVE_LONG_LONG@;/'\
+    -e 's/SC.have_stdint_h = [01];/SC.have_stdint_h = @HAVE_STDINT_H@;/'\
+    -e 's/SC.fortran_mangle_upcase = [01];/SC.fortran_mangle_upcase = @FC_MANGLE_UPCASE@;/'\
+    -e 's/SC.fortran_mangle_suffix =.*;/SC.fortran_mangle_suffix = "@FC_MANGLE_SUFFIX@";/'\
+    -e 's/SC.fortran_mangle_uscore =.*;/SC.fortran_mangle_uscore = @FC_MANGLE_EXTRA_USCORE@;/'\
+    -e 's/fc_dummy_main[ \t]*[=][ \t]*.*/fc_dummy_main = "@FC_DUMMY_MAIN@";/'\
+    -e 's/fc_main[ \t]*=[ \t]*.*/fc_main = "@FC_MAIN@";/'\
+    \
+    -e 's/^define[ \t]*slirp_map_int16.*$/define slirp_map_int16(ctype)	{ slirp_map_@int16_mnemonic@(ctype);  }/' \
+    -e 's/^define[ \t]*slirp_map_uint16.*$/define slirp_map_uint16(ctype)	{ slirp_map_@uint16_mnemonic@(ctype); }/' \
+    -e 's/^define[ \t]*slirp_map_int32.*$/define slirp_map_int32(ctype)	{ slirp_map_@int32_mnemonic@(ctype);  }/' \
+    -e 's/^define[ \t]*slirp_map_uint32.*$/define slirp_map_uint32(ctype)	{ slirp_map_@uint32_mnemonic@(ctype); }/' \
+    -e 's/^define[ \t]*slirp_map_int64.*$/define slirp_map_int64(ctype)	{ slirp_map_@int64_mnemonic@(ctype);  }/' \
+    -e 's/^define[ \t]*slirp_map_uint64.*$/define slirp_map_uint64(ctype)	{ slirp_map_@uint64_mnemonic@(ctype); }/' \
+    -e 's/^define[ \t]*slirp_map_float32.*$/define slirp_map_float32(ctype)	{ slirp_map_@float32_mnemonic@(ctype); }/' \
+    -e 's/^define[ \t]*slirp_map_float64.*$/define slirp_map_float64(ctype)	{ slirp_map_@float64_mnemonic@(ctype); }/' \
+    -e 's/^define[ \t]*slirp_map_float96.*$/define slirp_map_float96(ctype)	{ slirp_map_@float96_mnemonic@(ctype); }/' \
+    -e 's/slirp_map_.*("size_t");/slirp_map_@size_t_mnemonic@("size_t");/' \
+    -e 's/slirp_map_.*("size_t");/slirp_map_@size_t_mnemonic@("size_t");/' \
+    -e 's/slirp_map_.*("bool");/slirp_map_@bool_mnemonic@("bool");/' \
+    -e 's/slirp_map_.*("ptrdiff_t");/slirp_map_@ptrdiff_t_mnemonic@("ptrdiff_t");/'\
+    -e 's/^[ \t]*MAX_VEC_ARGS[ \t]*=[ \t]*.*$/\t\tMAX_VEC_ARGS=@nvec@,/'\
+    \
+    \
+   $1 > $newfile
+
+echo
+echo "Created ${newfile}, with diffs:"
+echo
+
+diff $1 $newfile
